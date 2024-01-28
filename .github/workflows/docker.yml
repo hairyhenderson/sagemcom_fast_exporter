@@ -46,6 +46,13 @@ jobs:
           echo "major_version=${tag%%\.*}" >> $GITHUB_ENV
         fi
       if: github.repository == 'hairyhenderson/sagemcom_fast_exporter'
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && (github.ref == 'refs/heads/main' || env.is_tag == 'true')
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
@@ -60,17 +67,27 @@ jobs:
         docker buildx imagetools create --dry-run -t localhost:5000/${IMG_NAME}:dev localhost:5000/${IMG_NAME}:latest
         docker buildx imagetools create --dry-run -t localhost:5000/${IMG_NAME}:dev-alpine localhost:5000/${IMG_NAME}:alpine
       if: github.repository != 'hairyhenderson/sagemcom_fast_exporter' || github.ref != 'refs/heads/main'
-    - name: Build & Push (main branch)
+    - name: Build & Push (main/tags)
       run: |
-        make docker-multi COMMIT=${{ github.sha }} DOCKER_REPO=hairyhenderson/${IMG_NAME} BUILDX_ACTION=--push
-      if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && github.ref == 'refs/heads/main'
-    - name: Build & Push (tagged release)
-      run: |
-        make docker-multi COMMIT=${{ github.sha }} DOCKER_REPO=hairyhenderson/${IMG_NAME} BUILDX_ACTION=--push
+        src_repo=hairyhenderson/${IMG_NAME}
 
         set -x
-        docker buildx imagetools create -t hairyhenderson/${IMG_NAME}:${git_tag} hairyhenderson/${IMG_NAME}:latest
-        docker buildx imagetools create -t hairyhenderson/${IMG_NAME}:${major_version} hairyhenderson/${IMG_NAME}:latest
-        docker buildx imagetools create -t hairyhenderson/${IMG_NAME}:${git_tag}-alpine hairyhenderson/${IMG_NAME}:alpine
-        docker buildx imagetools create -t hairyhenderson/${IMG_NAME}:${major_version}-alpine hairyhenderson/${IMG_NAME}:alpine
+        make docker-multi COMMIT=${{ github.sha }} DOCKER_REPO=${src_repo} BUILDX_ACTION=--push
+      if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && (github.ref == 'refs/heads/main' || env.is_tag == 'true')
+    - name: Push (tagged release)
+      run: |
+        src_repo=hairyhenderson/${IMG_NAME}
+
+        set -x
+        repo=$src_repo
+        docker buildx imagetools create -t ${repo}:${git_tag} ${src_repo}:latest
+        docker buildx imagetools create -t ${repo}:${major_version} ${src_repo}:latest
+        docker buildx imagetools create -t ${repo}:${git_tag}-alpine ${src_repo}:alpine
+        docker buildx imagetools create -t ${repo}:${major_version}-alpine ${src_repo}:alpine
+
+        repo=ghcr.io/hairyhenderson/${IMG_NAME}
+        docker buildx imagetools create -t ${repo}:${git_tag} ${src_repo}:latest
+        docker buildx imagetools create -t ${repo}:${major_version} ${src_repo}:latest
+        docker buildx imagetools create -t ${repo}:${git_tag}-alpine ${src_repo}:alpine
+        docker buildx imagetools create -t ${repo}:${major_version}-alpine ${src_repo}:alpine
       if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && env.is_tag == 'true'
