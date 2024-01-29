@@ -51,6 +51,16 @@ To configure Prometheus to scrape from this exporter, use a [scrape_config](http
         - 'localhost:9780'
 ```
 
+## Grafana Dashboard
+
+There's a Grafana dashboard available [in this repo](./dashboard.json) which looks like this:
+
+![Grafana dashboard](./dashboard.png)
+
+The easiest way to get set up with Grafana is to use [Grafana Cloud](https://grafana.com/products/cloud/), which has an excellent free tier.
+
+To use it, you'll need to set up a Prometheus data source in Grafana, and then import the dashboard.
+
 ## License
 
 [The MIT License](http://opensource.org/licenses/MIT)
