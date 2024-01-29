@@ -73,6 +73,10 @@ jobs:
 
         set -x
         make docker-multi COMMIT=${{ github.sha }} DOCKER_REPO=${src_repo} BUILDX_ACTION=--push
+
+        set -x
+        docker buildx imagetools create -t ghcr.io/hairyhenderson/${IMG_NAME}:latest ${src_repo}:latest
+        docker buildx imagetools create -t ghcr.io/hairyhenderson/${IMG_NAME}:alpine ${src_repo}:alpine
       if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && (github.ref == 'refs/heads/main' || env.is_tag == 'true')
     - name: Push (tagged release)
       run: |
