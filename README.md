@@ -53,7 +53,7 @@ To configure Prometheus to scrape from this exporter, use a [scrape_config](http
 
 ## Grafana Dashboard
 
-There's a Grafana dashboard available [in this repo](./dashboard.json) which looks like this:
+There's a Grafana dashboard published to [Grafana.com](https://grafana.com/grafana/dashboards/20374) and also available [in this repo](./dashboard.json) which looks like this:
 
 ![Grafana dashboard](./dashboard.png)
 
