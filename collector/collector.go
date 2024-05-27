@@ -7,16 +7,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hairyhenderson/sagemcom_fast_exporter"
+	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/otel"
 )
 
-var tracer = otel.GetTracerProvider().Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/collector")
+//nolint:gochecknoglobals
+var tracer = otel.Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/collector")
 
 type collector struct {
 	ctx     context.Context
-	scraper sagemcom_fast_exporter.Scraper
+	scraper client.Scraper
 
 	scrapeObserver ScrapeObserver
 
@@ -101,7 +102,7 @@ type opticalMetrics struct {
 	errorsRx         *typedDesc
 
 	// other metrics
-	// TODO: what unit is this? thousands of degree celcius?
+	// TODO: what unit is this? thousands of degree celsius?
 	temperature *typedDesc
 
 	upperOpticalThreshold       *typedDesc
@@ -165,6 +166,7 @@ type wifiSSIDMetrics struct {
 	errorsTx         *typedDesc
 }
 
+//nolint:funlen
 func initEthMetrics(ns string) ethMetrics {
 	ifaceLabels := []string{"name", "alias"}
 
@@ -218,8 +220,10 @@ func initEthMetrics(ns string) ethMetrics {
 			desc: prometheus.NewDesc(
 				buildName("info"),
 				"A metric with a constant '1' value labeled by various diagnostic interface information",
-				[]string{"name", "alias",
-					"cable_status", "current_duplex_mode", "mac_address", "role", "status"},
+				[]string{
+					"name", "alias", "cable_status",
+					"current_duplex_mode", "mac_address", "role", "status",
+				},
 				nil,
 			),
 			valueType: prometheus.GaugeValue,
@@ -227,6 +231,7 @@ func initEthMetrics(ns string) ethMetrics {
 	}
 }
 
+//nolint:funlen
 func initOpticalMetrics(ns string) opticalMetrics {
 	ifaceLabels := []string{"name", "alias"}
 
@@ -274,7 +279,7 @@ func initOpticalMetrics(ns string) opticalMetrics {
 
 		status: ifaceGauge("status", "Status of this interface (0=UP, 1=DOWN, 2=UNKNOWN, 3=DORMANT, 4=NOTPRESENT, 5=LOWERLAYERDOWN, 6=ERROR)"),
 
-		temperature: ifaceGauge("temperature_degrees_celcius", "Temperature of this interface"),
+		temperature: ifaceGauge("temperature_degrees_celsius", "Temperature of this interface"),
 
 		upperOpticalThreshold: ifaceGauge("upper_optical_threshold", "Upper optical threshold of this interface"),
 		upperTransmitPowerThreshold: ifaceGauge("upper_transmit_power_threshold",
@@ -292,8 +297,10 @@ func initOpticalMetrics(ns string) opticalMetrics {
 			desc: prometheus.NewDesc(
 				buildName("info"),
 				"A metric with a constant '1' value labeled by various diagnostic interface information",
-				[]string{"name", "alias",
-					"alarm", "part_number", "vendor_name", "status"},
+				[]string{
+					"name", "alias", "alarm",
+					"part_number", "vendor_name", "status",
+				},
 				nil,
 			),
 			valueType: prometheus.GaugeValue,
@@ -301,6 +308,7 @@ func initOpticalMetrics(ns string) opticalMetrics {
 	}
 }
 
+//nolint:funlen
 func initResourcesMetrics(ns string) resourcesMetrics {
 	procLabels := []string{"name", "pid"}
 
@@ -508,7 +516,7 @@ type ScrapeObserver interface {
 	Observe(duration time.Duration, success bool)
 }
 
-func New(ctx context.Context, scraper sagemcom_fast_exporter.Scraper, scrapeObserver ScrapeObserver) prometheus.Collector {
+func New(ctx context.Context, scraper client.Scraper, scrapeObserver ScrapeObserver) prometheus.Collector {
 	ns := "sagemcom_fast"
 
 	coll := &collector{
@@ -528,7 +536,7 @@ func New(ctx context.Context, scraper sagemcom_fast_exporter.Scraper, scrapeObse
 	return coll
 }
 
-func (c *collector) Describe(ch chan<- *prometheus.Desc) {
+func (c *collector) Describe(_ chan<- *prometheus.Desc) {
 }
 
 func (c *collector) Collect(ch chan<- prometheus.Metric) {
@@ -553,6 +561,7 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 	defer span.End()
 
 	slog.DebugContext(ctx, "getting Device value")
+
 	v, err := c.scraper.GetValue(ctx, "Device")
 	if err != nil {
 		slog.ErrorContext(ctx, "update getValue errored", "err", err)
@@ -561,6 +570,7 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 	}
 
 	slog.DebugContext(ctx, "getting resource usage")
+
 	r, err := c.scraper.GetResourceUsage(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "update getResourceUsage errored", "err", err)
@@ -569,11 +579,10 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 	}
 
 	slog.DebugContext(ctx, "got resources, updating metrics")
-	if err := c.updateResources(ch, r); err != nil {
-		return fmt.Errorf("updateResources: %w", err)
-	}
+	c.updateResources(ch, r)
 
 	d := v.Device
+
 	slog.DebugContext(ctx, "got device, updating metrics")
 
 	for _, iface := range d.Ethernet.Interfaces {
@@ -581,39 +590,25 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 			continue
 		}
 
-		err := c.updateEthernet(ch, iface)
-		if err != nil {
-			return fmt.Errorf("updateEthernet: %w", err)
-		}
+		c.updateEthernet(ch, iface)
 	}
 
 	for _, iface := range d.Optical.Interfaces {
-		err := c.updateOptical(ch, iface)
-		if err != nil {
-			return fmt.Errorf("updateOptical: %w", err)
-		}
+		c.updateOptical(ch, iface)
 	}
 
 	radioNameToIfcName := map[string]string{}
 	for _, radio := range d.WiFi.Radios {
 		radioNameToIfcName[radio.Name] = radio.IfcName
 
-		err := c.updateWiFiRadio(ch, radio)
-		if err != nil {
-			return fmt.Errorf("updateWiFiRadio: %w", err)
-		}
+		c.updateWiFiRadio(ch, radio)
 	}
 
 	for _, ssid := range d.WiFi.SSIDs {
-		err := c.updateWiFiSSID(ch, ssid, radioNameToIfcName)
-		if err != nil {
-			return fmt.Errorf("updateWiFiSSID: %w", err)
-		}
+		c.updateWiFiSSID(ch, ssid, radioNameToIfcName)
 	}
 
-	if err := c.updateSys(ch, d.DeviceInfo); err != nil {
-		return fmt.Errorf("updateSys: %w", err)
-	}
+	c.updateSys(ch, d.DeviceInfo)
 
 	return nil
 }
@@ -639,14 +634,9 @@ func statusNum(status string) int {
 	}
 }
 
-func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface sagemcom_fast_exporter.EthernetInterface) error {
+func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface client.EthernetInterface) {
 	m := c.ethernet
 	labelValues := []string{iface.IfcName, iface.Alias}
-
-	infoValues := append(labelValues,
-		iface.Diagnostics.CableStatus, iface.Diagnostics.CurrentDuplexMode,
-		iface.MACAddress, iface.Role, iface.Status)
-	ch <- recordNum(m.info, 1, infoValues...)
 
 	// convert from Mbps to bps
 	bitrate := iface.CurrentBitRate * 1000 * 1000
@@ -667,16 +657,14 @@ func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface sagemcom_f
 	ch <- recordNum(m.errorsRx, iface.Stats.ErrorsReceived, labelValues...)
 	ch <- recordNum(m.status, statusNum(iface.Status), labelValues...)
 
-	return nil
+	ch <- recordNum(m.info, 1, append(labelValues,
+		iface.Diagnostics.CableStatus, iface.Diagnostics.CurrentDuplexMode,
+		iface.MACAddress, iface.Role, iface.Status)...)
 }
 
-func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface sagemcom_fast_exporter.OpticalInterface) error {
+func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface client.OpticalInterface) {
 	m := c.optical
 	labelValues := []string{iface.IfcName, iface.Alias}
-
-	infoValues := append(labelValues,
-		iface.Alarm, iface.OpticalPartNumber, iface.OpticalVendorName, iface.Status)
-	ch <- recordNum(m.info, 1, infoValues...)
 
 	// stats metrics
 	ch <- recordNum(m.bcastPacketsRx, iface.Stats.BroadcastPacketsReceived, labelValues...)
@@ -704,15 +692,15 @@ func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface sagemcom_fa
 	ch <- recordNum(m.lastChange, iface.LastChange, labelValues...)
 	ch <- recordNum(m.status, statusNum(iface.Status), labelValues...)
 
-	return nil
+	ch <- recordNum(m.info, 1, append(labelValues,
+		iface.Alarm, iface.OpticalPartNumber, iface.OpticalVendorName, iface.Status)...)
 }
 
-func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio sagemcom_fast_exporter.Radio) error {
+func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio client.Radio) {
 	m := c.wifiRadio
 
 	labelValues := []string{radio.IfcName, radio.Alias}
-	infoValues := append(labelValues, radio.RegulatoryDomain, radio.SupportedStandards, radio.SupportedChannelBandwidth)
-	ch <- recordNum(m.radioInfo, 1, infoValues...)
+	ch <- recordNum(m.radioInfo, 1, append(labelValues, radio.RegulatoryDomain, radio.SupportedStandards, radio.SupportedChannelBandwidth)...)
 
 	ch <- recordNum(m.radioStatus, statusNum(radio.Status), labelValues...)
 	ch <- recordNum(m.channel, radio.Channel, labelValues...)
@@ -722,17 +710,14 @@ func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio sagemcom_
 	ch <- recordNum(m.transmitPower, radio.TransmitPower, labelValues...)
 	ch <- recordNum(m.transmitPowerMax, radio.TransmitPowerMax, labelValues...)
 	ch <- recordNum(m.lastChange, radio.LastChange, labelValues...)
-
-	return nil
 }
 
-func (c *collector) updateWiFiSSID(ch chan<- prometheus.Metric, ssid sagemcom_fast_exporter.SSID, radioNameToIfcName map[string]string) error {
+func (c *collector) updateWiFiSSID(ch chan<- prometheus.Metric, ssid client.SSID, radioNameToIfcName map[string]string) {
 	m := c.wifiSSID
 
 	labelValues := []string{ssid.IfcName, ssid.Alias, ssid.SSID, radioNameToIfcName[ssid.LowerLayers]}
 
-	infoValues := append(labelValues, ssid.Status, ssid.MACAddress)
-	ch <- recordNum(m.ssidInfo, 1, infoValues...)
+	ch <- recordNum(m.ssidInfo, 1, append(labelValues, ssid.Status, ssid.MACAddress)...)
 
 	ch <- recordNum(m.ssidStatus, statusNum(ssid.Status), labelValues...)
 	ch <- recordNum(m.packetsRx, ssid.Stats.PacketsReceived, labelValues...)
@@ -749,11 +734,9 @@ func (c *collector) updateWiFiSSID(ch chan<- prometheus.Metric, ssid sagemcom_fa
 	ch <- recordNum(m.discardPacketsTx, ssid.Stats.DiscardPacketsSent, labelValues...)
 	ch <- recordNum(m.errorsRx, ssid.Stats.ErrorsReceived, labelValues...)
 	ch <- recordNum(m.errorsTx, ssid.Stats.ErrorsSent, labelValues...)
-
-	return nil
 }
 
-func (c *collector) updateResources(ch chan<- prometheus.Metric, r *sagemcom_fast_exporter.ResourceUsage) error {
+func (c *collector) updateResources(ch chan<- prometheus.Metric, r *client.ResourceUsage) {
 	m := c.resources
 
 	// these are all in KiB, convert to bytes
@@ -778,6 +761,7 @@ func (c *collector) updateResources(ch chan<- prometheus.Metric, r *sagemcom_fas
 		ch <- recordNum(m.processCPUTime, float64(proc.CPUTime)/1000, procLabels...)
 
 		state := int64(0)
+
 		switch proc.State {
 		case "RUNNING":
 			state = 0
@@ -788,16 +772,14 @@ func (c *collector) updateResources(ch chan<- prometheus.Metric, r *sagemcom_fas
 		case "ZOMBIE":
 			state = 3
 		}
+
 		ch <- recordNum(m.processState, state, procLabels...)
 
-		infoValues := append(procLabels, strconv.Itoa(proc.Priority), proc.State)
-		ch <- recordNum(m.processInfo, 1, infoValues...)
+		ch <- recordNum(m.processInfo, 1, append(procLabels, strconv.Itoa(proc.Priority), proc.State)...)
 	}
-
-	return nil
 }
 
-func (c *collector) updateSys(ch chan<- prometheus.Metric, di sagemcom_fast_exporter.DeviceInfo) error {
+func (c *collector) updateSys(ch chan<- prometheus.Metric, di client.DeviceInfo) {
 	m := c.sys
 
 	ch <- recordNum(m.uptime, di.UpTime)
@@ -833,8 +815,6 @@ func (c *collector) updateSys(ch chan<- prometheus.Metric, di sagemcom_fast_expo
 		di.SoftwareVersion,
 		di.SpecVersion,
 	}...)
-
-	return nil
 }
 
 // from node_exporter - we want to expose counters, but we can't simply

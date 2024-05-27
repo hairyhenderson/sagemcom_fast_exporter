@@ -13,6 +13,7 @@ type scrapeObserver struct {
 
 func newScrapeObserver() *scrapeObserver {
 	ns := "sagemcom_fast_exporter"
+
 	return &scrapeObserver{
 		scrapeDuration: prometheus.NewHistogram(
 			prometheus.HistogramOpts{
@@ -41,6 +42,7 @@ func newScrapeObserver() *scrapeObserver {
 
 func (o *scrapeObserver) Observe(duration time.Duration, success bool) {
 	o.scrapeDuration.Observe(duration.Seconds())
+
 	if success {
 		o.scrapeSuccess.Set(1)
 	} else {
