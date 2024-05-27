@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hairyhenderson/sagemcom_fast_exporter"
+	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/hairyhenderson/sagemcom_fast_exporter/collector"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -33,6 +33,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+//nolint:gochecknoglobals
 var tracer = otel.Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/cmd/sagemcom_fast_exporter")
 
 type config struct {
@@ -62,7 +63,7 @@ func main() {
 func parseFlags(fs *flag.FlagSet, cfg *config) error {
 	fs.StringVar(&cfg.Host, "host", "192.168.2.1", "IP address or hostname of the router")
 	fs.StringVar(&cfg.Username, "username", "admin", "Username to use for authentication")
-	fs.StringVar(&cfg.AuthMethod, "auth-method", sagemcom_fast_exporter.EncryptionMethodSHA512,
+	fs.StringVar(&cfg.AuthMethod, "auth-method", client.EncryptionMethodSHA512,
 		"Authentication method to use (SHA512 or MD5)")
 	fs.StringVar(&cfg.Password, "password", "", "Password to use for authentication")
 
@@ -84,13 +85,14 @@ func run(ctx context.Context, cfg *config) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer stop()
 
-	logger := setupLogger(ctx, cfg.LogLevel)
+	logger := setupLogger(cfg.LogLevel)
 	slog.SetDefault(logger)
 
 	closer, err := setupTracing(ctx, "sagemcom_fast_exporter")
 	if err != nil {
 		return fmt.Errorf("setupTracing: %w", err)
 	}
+
 	defer func() { _ = closer(ctx) }()
 
 	rt := otelhttp.NewTransport(http.DefaultTransport)
@@ -98,12 +100,9 @@ func run(ctx context.Context, cfg *config) error {
 		Transport: rt,
 	}
 
-	scraper := sagemcom_fast_exporter.New(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, hc, cfg.Refresh)
+	scraper := client.New(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, hc, cfg.Refresh)
 
-	srv, err := setupServer(ctx, scraper)
-	if err != nil {
-		return fmt.Errorf("setupServer: %w", err)
-	}
+	srv := setupServer(ctx, scraper)
 
 	ln, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
@@ -127,8 +126,9 @@ func run(ctx context.Context, cfg *config) error {
 	return nil
 }
 
-func setupLogger(ctx context.Context, level string) *slog.Logger {
+func setupLogger(level string) *slog.Logger {
 	var lvl slog.Level
+
 	switch level {
 	case "debug":
 		lvl = slog.LevelDebug
@@ -149,7 +149,7 @@ func setupLogger(ctx context.Context, level string) *slog.Logger {
 	return l
 }
 
-func setupServer(ctx context.Context, scraper sagemcom_fast_exporter.Scraper) (*http.Server, error) {
+func setupServer(ctx context.Context, scraper client.Scraper) *http.Server {
 	router := http.NewServeMux()
 	imh := promhttp.InstrumentMetricHandler(
 		prometheus.DefaultRegisterer,
@@ -175,10 +175,10 @@ func setupServer(ctx context.Context, scraper sagemcom_fast_exporter.Scraper) (*
 		// ErrorLog:          errLogger,
 	}
 
-	return srv, nil
+	return srv
 }
 
-func scrapeHandler(scraper sagemcom_fast_exporter.Scraper) http.HandlerFunc {
+func scrapeHandler(scraper client.Scraper) http.HandlerFunc {
 	obs := newScrapeObserver()
 	prometheus.MustRegister(obs)
 
@@ -224,8 +224,10 @@ func (h *traceLogHandler) Handle(ctx context.Context, r slog.Record) error {
 	span := trace.SpanFromContext(ctx)
 	if span.IsRecording() {
 		var attrs []attribute.KeyValue
+
 		r.Attrs(func(a slog.Attr) bool {
 			attrs = append(attrs, attribute.String(a.Key, a.Value.String()))
+
 			return true
 		})
 
@@ -283,7 +285,7 @@ func setupTracing(ctx context.Context, serviceName string) (closer func(context.
 	))
 
 	otel.SetErrorHandler(otelErrHandler(func(err error) {
-		logger.Error("OTel error", err)
+		logger.Error("OTel error", slog.Any("err", err))
 	}))
 
 	shutdown := func(ctx context.Context) error {
@@ -344,9 +346,7 @@ type instrumentedTransport struct {
 	name string
 }
 
-var (
-	_ http.RoundTripper = (*instrumentedTransport)(nil)
-)
+var _ http.RoundTripper = (*instrumentedTransport)(nil)
 
 func (t *instrumentedTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 	if t.RoundTripper == nil {
@@ -360,18 +360,11 @@ func (t *instrumentedTransport) RoundTrip(r *http.Request) (*http.Response, erro
 		otelhttptrace.NewClientTrace(ctx,
 			// TODO: consider including subspans instead of events...
 			otelhttptrace.WithoutSubSpans(),
-			// I don't like the attribute names used for headers by,
-			// otelhttptrace, so we'll keep using our own (in TagsFromRe* below)
-			otelhttptrace.WithoutHeaders(),
 		),
 	)
 	r = r.WithContext(ctx)
 
 	resp, err := t.RoundTripper.RoundTrip(r)
-
-	// traceutil.TagsFromRequest(span, r)
-	// traceutil.TagsFromResponse(span, resp)
-
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
