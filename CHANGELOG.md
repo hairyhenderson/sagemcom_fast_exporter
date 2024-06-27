@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.1...v0.1.2) (2024-06-27)
+
+
+### Dependencies
+
+* **go:** Bump github.com/prometheus/common from 0.54.0 to 0.55.0 ([#59](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/59)) ([7ecc5c7](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/7ecc5c7e88523ca02570a6da76627c5eebd04d1a))
+
 ## [0.1.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.0...v0.1.1) (2024-06-08)
 
 
