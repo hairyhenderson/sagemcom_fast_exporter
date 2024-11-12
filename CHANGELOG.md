@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.2...v0.1.3) (2024-11-12)
+
+
+### Dependencies
+
+* **go:** Bump go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace ([#99](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/99)) ([0db0012](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/0db0012c37fdcdf1cd3340e82e3502500f23d7ef))
+* **go:** Bump go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc ([#101](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/101)) ([927f6dc](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/927f6dcf7bd9f678db7650b1e10dfdba6c59d850))
+
 ## [0.1.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.1...v0.1.2) (2024-10-25)
 
 
