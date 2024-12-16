@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.4](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.3...v0.1.4) (2024-12-16)
+
+
+### Dependencies
+
+* **docker:** Bump alpine from 3.20 to 3.21 ([#107](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/107)) ([3157825](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/3157825ff6f7159953d74412984331f5126ecf80))
+* **go:** Bump github.com/prometheus/common from 0.60.1 to 0.61.0 ([#106](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/106)) ([dce11aa](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/dce11aaa82733f9288d30515a034b854b15ad0a2))
+* **go:** Bump go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace ([#110](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/110)) ([3c58923](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/3c589235ebd967e9480c5faa1f710b11a1a2cd7d))
+* **go:** Bump go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp ([#114](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/114)) ([05ee019](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/05ee019dad7620379f68c21113ab8693cdaa2d8d))
+* **go:** Bump go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc ([#112](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/112)) ([7c47621](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/7c47621b4aaf959474cdf669b9e934bbc7696cf8))
+* **go:** Bump go.opentelemetry.io/otel/sdk from 1.32.0 to 1.33.0 ([#113](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/113)) ([92c6006](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/92c6006b33372594fa54373fec4e9a2a44cd9773))
+
 ## [0.1.3](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.2...v0.1.3) (2024-11-12)
 
 
