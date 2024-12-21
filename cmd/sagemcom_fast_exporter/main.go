@@ -20,12 +20,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
+	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -260,9 +260,9 @@ func setupTracing(ctx context.Context, serviceName string) (closer func(context.
 
 	var exporter sdktrace.SpanExporter
 
-	exporter, err = otlptracegrpc.New(ctx)
+	exporter, err = autoexport.NewSpanExporter(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to init OTLP exporter: %w", err)
+		return nil, fmt.Errorf("failed to init OTel exporter: %w", err)
 	}
 
 	res, err := traceResource(ctx, serviceName)
