@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.4...v0.2.0) (2024-12-21)
+
+
+### Features
+
+* **traces:** Use autoexport to configure OTel exporter ([#116](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/116)) ([bcbc8bc](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/bcbc8bc19eec12679f7c5b8e0c035ab6ab2db719))
+
 ## [0.1.4](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.3...v0.1.4) (2024-12-16)
 
 
