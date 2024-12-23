@@ -513,7 +513,7 @@ func initWiFiSSIDMetrics(ns string) wifiSSIDMetrics {
 }
 
 type ScrapeObserver interface {
-	Observe(duration time.Duration, success bool)
+	Observe(ctx context.Context, duration time.Duration, success bool)
 }
 
 func New(ctx context.Context, scraper client.Scraper, scrapeObserver ScrapeObserver) prometheus.Collector {
@@ -550,7 +550,7 @@ func (c *collector) Collect(ch chan<- prometheus.Metric) {
 		slog.Default().ErrorContext(ctx, "update error", "err", err)
 	}
 
-	c.scrapeObserver.Observe(time.Since(start), err == nil)
+	c.scrapeObserver.Observe(ctx, time.Since(start), err == nil)
 }
 
 func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) error {

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type scrapeObserver struct {
@@ -40,8 +42,15 @@ func newScrapeObserver() *scrapeObserver {
 	}
 }
 
-func (o *scrapeObserver) Observe(duration time.Duration, success bool) {
-	o.scrapeDuration.Observe(duration.Seconds())
+func (o *scrapeObserver) Observe(ctx context.Context, duration time.Duration, success bool) {
+	// add traceID as exemplar, if available
+	traceID := trace.SpanFromContext(ctx).SpanContext().TraceID()
+	if traceID.IsValid() {
+		o.scrapeDuration.(prometheus.ExemplarObserver).ObserveWithExemplar(duration.Seconds(),
+			prometheus.Labels{"traceID": traceID.String()})
+	} else {
+		o.scrapeDuration.Observe(duration.Seconds())
+	}
 
 	if success {
 		o.scrapeSuccess.Set(1)
