@@ -9,20 +9,32 @@ import (
 	"time"
 )
 
+// requestBody - represents the body of a request to the API
+//
+// note: order of fields is significant - the API will reject requests if the
+// order is not maintained
+//
+//nolint:govet
 type requestBody struct {
-	AuthKey   string   `json:"auth-key"`
-	Actions   []action `json:"actions"`
 	ID        int      `json:"id"`
 	SessionID int      `json:"session-id"`
-	Cnonce    int      `json:"cnonce"`
 	Priority  bool     `json:"priority"`
+	Actions   []action `json:"actions"`
+	Cnonce    int      `json:"cnonce"`
+	AuthKey   string   `json:"auth-key"`
 }
 
+// action - represents a single action to be performed
+//
+// note: order of fields is significant - the API will reject requests if the
+// order is not maintained
+//
+//nolint:govet
 type action struct {
-	Parameters map[string]any `json:"parameters,omitempty"`
+	ID         int            `json:"id"`
 	Method     string         `json:"method"`
+	Parameters map[string]any `json:"parameters,omitempty"`
 	XPath      string         `json:"xpath,omitempty"`
-	ID         int            `json:"id,omitempty"`
 }
 
 type sessionOptions struct {

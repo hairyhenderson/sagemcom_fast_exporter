@@ -415,7 +415,9 @@ func (c *client) Logout(ctx context.Context) error {
 // GetValue - port of python's get_value_by_xpath
 // Retrieve raw value from router using XPath.
 func (c *client) GetValue(ctx context.Context, xpath string) (*ValueResponse, error) {
-	ctx, span := tracer.Start(ctx, "SagemcomClient.GetValue")
+	ctx, span := tracer.Start(ctx, "SagemcomClient.GetValue", trace.WithAttributes(
+		attribute.String("xpath", xpath),
+	))
 	defer span.End()
 
 	actions := []action{
