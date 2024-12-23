@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.0...v0.2.1) (2024-12-23)
+
+
+### Bug Fixes
+
+* **types:** Correct field order breaking requests ([#119](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/119)) ([7e9ef44](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/7e9ef4438e368e933d1731cd3af6a708f44e8cf3))
+
 ## [0.2.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.1.4...v0.2.0) (2024-12-21)
 
 
