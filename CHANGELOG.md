@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.1...v0.3.0) (2024-12-23)
+
+
+### Features
+
+* **metrics:** Add traceID exemplar to scrape duration histogram ([#121](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/121)) ([9dff72a](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/9dff72affc05a789a8bdf7766837f2a91af73e1f))
+
 ## [0.2.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.0...v0.2.1) (2024-12-23)
 
 
