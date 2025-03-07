@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.1...v0.3.0) (2025-03-07)
+
+
+### Features
+
+* **metrics:** Add traceID exemplar to scrape duration histogram ([#121](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/121)) ([9dff72a](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/9dff72affc05a789a8bdf7766837f2a91af73e1f))
+
+
+### Dependencies
+
+* **docker:** Bump golang from 1.23-alpine to 1.24-alpine ([#130](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/130)) ([a2faeaa](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/a2faeaaa87697fd2bd3cce77319b8e82647d11f0))
+* **go:** Bump the otel group with 6 updates ([#140](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/140)) ([aa19d09](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/aa19d09a05fd2941983ac551c9f7363436996283))
+
 ## [0.2.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.0...v0.2.1) (2024-12-23)
 
 
