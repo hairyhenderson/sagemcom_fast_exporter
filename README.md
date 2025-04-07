@@ -7,11 +7,19 @@ A Prometheus exporter for the Sagemcom F@st series of fibre hub/routers. It gath
 
 Much of this was ported from https://github.com/iMicknl/python-sagemcom-api, so thanks to @iMicknl for doing the hard work of figuring out the API!
 
-This was developed with a Bell Gigahub with firmware `1.19.6`, untested on other models and releases.
+## Compatibility
+
+| Model Number | Firmwares known to work | Notes                              |
+|--------------|-------------------------|------------------------------------|
+| 5690         | 1.19.6, 2.13            | Marketed by Bell Canada as GigaHub |
+
+If you have a model not listed here but able to run the exporter, please file an issue or issue a PR to update this list!
+
+If you'd like to get an unsupported model working, please file an issue and I'll try to help you out.
 
 ## Installation
 
-You can build a binary for your system with `go get github.com/hairyhenderson/sagemcom_fast_exporter`, or you can use a [pre-built Docker image](https://hub.docker.com/r/hairyhenderson/sagemcom_fast_exporter):
+You can build a binary for your system with `go install github.com/hairyhenderson/sagemcom_fast_exporter@latest`, or you can use a [pre-built Docker image](https://hub.docker.com/r/hairyhenderson/sagemcom_fast_exporter):
 
 ```console
 $ docker run hairyhenderson/sagemcom_fast_exporter
@@ -65,4 +73,4 @@ To use it, you'll need to set up a Prometheus data source in Grafana, and then i
 
 [The MIT License](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2023-2024 Dave Henderson
+Copyright (c) 2023-2025 Dave Henderson
