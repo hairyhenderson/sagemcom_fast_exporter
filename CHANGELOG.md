@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.0...v0.3.1) (2025-04-07)
+
+
+### Bug Fixes
+
+* **types:** Ignore SetIPTVInterface which can't be marshaled ([#145](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/145)) ([4b727cf](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/4b727cf6d9e32ac6173d374671acfe473e6c81eb))
+
+
+### Documentation
+
+* Add section about compatibility to README ([#147](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/147)) ([1798f89](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/1798f89639cfe54439072d5dfe68583fb0a679a8))
+
+
+### Dependencies
+
+* **actions:** Bump actions/create-github-app-token in the actions group ([#144](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/144)) ([b6c3d88](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/b6c3d884db1484578fb7c40e56697e779ed887ed))
+* **go:** Bump github.com/prometheus/common from 0.62.0 to 0.63.0 ([#142](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/142)) ([78f6191](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/78f6191a5813a6fa124aee395103968c8bc3721e))
+* **go:** Bump golang.org/x/net from 0.35.0 to 0.36.0 ([#141](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/141)) ([968e581](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/968e581a2c8a5c446ab9b76d7f269456eea572fd))
+
 ## [0.3.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.2.1...v0.3.0) (2025-03-07)
 
 
