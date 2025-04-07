@@ -1054,9 +1054,9 @@ type services struct {
 			DisplayInUI                 bool   `json:"DisplayInUI,omitempty"`
 			DisplayOnScreen             bool   `json:"DisplayOnScreen,omitempty"`
 		} `json:"TemperatureMonitoring,omitempty"`
-		WANSSHBlockTimer            int  `json:"WANSSHBlockTimer,omitempty"`
-		WANSSHSessionTimer          int  `json:"WANSSHSessionTimer,omitempty"`
-		SetIPTVInterface            int  `json:"SetIPTVInterface,omitempty"`
+		WANSSHBlockTimer   int `json:"WANSSHBlockTimer,omitempty"`
+		WANSSHSessionTimer int `json:"WANSSHSessionTimer,omitempty"`
+		// SetIPTVInterface            string `json:"SetIPTVInterface,omitempty"` // ignored
 		ButtonOsmEnable             bool `json:"ButtonOsmEnable,omitempty"`
 		FirmwareRollback            bool `json:"FirmwareRollback,omitempty"`
 		IPTVEnable                  bool `json:"IPTVEnable,omitempty"`
