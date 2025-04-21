@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.1...v0.3.2) (2025-04-21)
+
+
+### Dependencies
+
+* **go:** Bump github.com/prometheus/client_golang from 1.21.1 to 1.22.0 ([#149](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/149)) ([35765ce](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/35765ce7a44c815a4a0f062e4d8f1920f5362da8))
+
 ## [0.3.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.0...v0.3.1) (2025-04-07)
 
 
