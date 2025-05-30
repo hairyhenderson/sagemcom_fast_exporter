@@ -40,7 +40,7 @@ COPY --from=build /bin/${PKG_NAME}_${TARGETOS}-${TARGETARCH}${TARGETVARIANT} /${
 
 ENTRYPOINT [ "/sagemcom_fast_exporter" ]
 
-FROM alpine:3.21 AS alpine
+FROM alpine:3.22 AS alpine
 
 ARG PKG_NAME
 ARG VCS_REF
