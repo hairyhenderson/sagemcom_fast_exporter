@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.1...v0.3.2) (2025-06-03)
+
+
+### Dependencies
+
+* **docker:** Bump alpine from 3.21 to 3.22 ([#155](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/155)) ([6d99cd2](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/6d99cd2a133c0591a72ee7fe94ea6f7d4d6c5543))
+* **go:** Bump github.com/prometheus/client_golang from 1.21.1 to 1.22.0 ([#149](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/149)) ([35765ce](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/35765ce7a44c815a4a0f062e4d8f1920f5362da8))
+* **go:** Bump the otel group across 1 directory with 6 updates ([#154](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/154)) ([7e18bba](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/7e18bba05813bd439f1bae899d033d9266d32ce2))
+
 ## [0.3.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.0...v0.3.1) (2025-04-07)
 
 
