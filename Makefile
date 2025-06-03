@@ -99,10 +99,9 @@ test:
 endif
 
 lint:
-	@golangci-lint run --verbose --max-same-issues=0 --max-issues-per-linter=0 --sort-results
+	@golangci-lint run --verbose --max-same-issues=0 --max-issues-per-linter=0
 
-ci-lint:
-	@golangci-lint run --verbose --max-same-issues=0 --max-issues-per-linter=0 --sort-results --out-format=github-actions
+ci-lint: lint
 
 .PHONY: clean test build lint ci-lint
 .DELETE_ON_ERROR:
