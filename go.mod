@@ -3,7 +3,7 @@ module github.com/hairyhenderson/sagemcom_fast_exporter
 go 1.23.4
 
 require (
-	github.com/prometheus/client_golang v1.22.0
+	github.com/prometheus/client_golang v1.23.0
 	github.com/prometheus/common v0.65.0
 	go.opentelemetry.io/contrib/exporters/autoexport v0.62.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.62.0
