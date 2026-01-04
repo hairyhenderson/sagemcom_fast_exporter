@@ -61,6 +61,7 @@ func (o *scrapeObserver) Observe(ctx context.Context, duration time.Duration, su
 
 func (o *scrapeObserver) Describe(ch chan<- *prometheus.Desc) {
 	ch <- o.scrapeDuration.Desc()
+
 	ch <- o.scrapeSuccess.Desc()
 }
 
