@@ -104,7 +104,9 @@ func run(ctx context.Context, cfg *config) error {
 
 	srv := setupServer(ctx, scraper)
 
-	ln, err := net.Listen("tcp", cfg.Addr)
+	lc := net.ListenConfig{}
+
+	ln, err := lc.Listen(ctx, "tcp", cfg.Addr)
 	if err != nil {
 		return fmt.Errorf("net.Listen: %w", err)
 	}

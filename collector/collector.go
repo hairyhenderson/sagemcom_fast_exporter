@@ -644,17 +644,29 @@ func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface client.Eth
 
 	// stats metrics
 	ch <- recordNum(m.bcastPacketsRx, iface.Stats.BroadcastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.bcastPacketsTx, iface.Stats.BroadcastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsRx, iface.Stats.MulticastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsTx, iface.Stats.MulticastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsRx, iface.Stats.UnicastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsTx, iface.Stats.UnicastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.packetsRx, iface.Stats.PacketsReceived, labelValues...)
+
 	ch <- recordNum(m.packetsTx, iface.Stats.PacketsSent, labelValues...)
+
 	ch <- recordNum(m.bytesRx, iface.Stats.BytesReceived, labelValues...)
+
 	ch <- recordNum(m.bytesTx, iface.Stats.BytesSent, labelValues...)
+
 	ch <- recordNum(m.discardPacketsRx, iface.Stats.DiscardPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.errorsRx, iface.Stats.ErrorsReceived, labelValues...)
+
 	ch <- recordNum(m.status, statusNum(iface.Status), labelValues...)
 
 	ch <- recordNum(m.info, 1, append(labelValues,
@@ -668,28 +680,48 @@ func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface client.Opti
 
 	// stats metrics
 	ch <- recordNum(m.bcastPacketsRx, iface.Stats.BroadcastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.bcastPacketsTx, iface.Stats.BroadcastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsRx, iface.Stats.MulticastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsTx, iface.Stats.MulticastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsRx, iface.Stats.UnicastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsTx, iface.Stats.UnicastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.packetsRx, iface.Stats.PacketsReceived, labelValues...)
+
 	ch <- recordNum(m.packetsTx, iface.Stats.PacketsSent, labelValues...)
+
 	ch <- recordNum(m.bytesRx, iface.Stats.BytesReceived, labelValues...)
+
 	ch <- recordNum(m.bytesTx, iface.Stats.BytesSent, labelValues...)
+
 	// ch <- recordNum(m.discardPacketsRx, iface.Stats.DiscardPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.errorsRx, iface.Stats.ErrorsReceived, labelValues...)
 
 	// other metrics
 	ch <- recordNum(m.temperature, iface.Temperature, labelValues...)
+
 	ch <- recordNum(m.upperOpticalThreshold, iface.UpperOpticalThreshold, labelValues...)
+
 	ch <- recordNum(m.lowerOpticalThreshold, iface.LowerOpticalThreshold, labelValues...)
+
 	ch <- recordNum(m.upperTransmitPowerThreshold, iface.UpperTransmitPowerThreshold, labelValues...)
+
 	ch <- recordNum(m.lowerTransmitPowerThreshold, iface.LowerTransmitPowerThreshold, labelValues...)
+
 	ch <- recordNum(m.opticalSignalLevel, iface.OpticalSignalLevel, labelValues...)
+
 	ch <- recordNum(m.voltage, iface.Voltage, labelValues...)
+
 	ch <- recordNum(m.biasCurrent, iface.BIASCurrent, labelValues...)
+
 	ch <- recordNum(m.lastChange, iface.LastChange, labelValues...)
+
 	ch <- recordNum(m.status, statusNum(iface.Status), labelValues...)
 
 	ch <- recordNum(m.info, 1, append(labelValues,
@@ -703,12 +735,19 @@ func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio client.Ra
 	ch <- recordNum(m.radioInfo, 1, append(labelValues, radio.RegulatoryDomain, radio.SupportedStandards, radio.SupportedChannelBandwidth)...)
 
 	ch <- recordNum(m.radioStatus, statusNum(radio.Status), labelValues...)
+
 	ch <- recordNum(m.channel, radio.Channel, labelValues...)
+
 	ch <- recordNum(m.maxBitRate, radio.MaxBitRate, labelValues...)
+
 	ch <- recordNum(m.bandwidth, radio.CurrentOperatingChannelBandwidth, labelValues...)
+
 	ch <- recordNum(m.noise, radio.Stats.Noise, labelValues...)
+
 	ch <- recordNum(m.transmitPower, radio.TransmitPower, labelValues...)
+
 	ch <- recordNum(m.transmitPowerMax, radio.TransmitPowerMax, labelValues...)
+
 	ch <- recordNum(m.lastChange, radio.LastChange, labelValues...)
 }
 
@@ -720,19 +759,33 @@ func (c *collector) updateWiFiSSID(ch chan<- prometheus.Metric, ssid client.SSID
 	ch <- recordNum(m.ssidInfo, 1, append(labelValues, ssid.Status, ssid.MACAddress)...)
 
 	ch <- recordNum(m.ssidStatus, statusNum(ssid.Status), labelValues...)
+
 	ch <- recordNum(m.packetsRx, ssid.Stats.PacketsReceived, labelValues...)
+
 	ch <- recordNum(m.packetsTx, ssid.Stats.PacketsSent, labelValues...)
+
 	ch <- recordNum(m.bytesRx, ssid.Stats.BytesReceived, labelValues...)
+
 	ch <- recordNum(m.bytesTx, ssid.Stats.BytesSent, labelValues...)
+
 	ch <- recordNum(m.bcastPacketsRx, ssid.Stats.BroadcastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.bcastPacketsTx, ssid.Stats.BroadcastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsRx, ssid.Stats.MulticastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.mcastPacketsTx, ssid.Stats.MulticastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsRx, ssid.Stats.UnicastPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.unicastPacketsTx, ssid.Stats.UnicastPacketsSent, labelValues...)
+
 	ch <- recordNum(m.discardPacketsRx, ssid.Stats.DiscardPacketsReceived, labelValues...)
+
 	ch <- recordNum(m.discardPacketsTx, ssid.Stats.DiscardPacketsSent, labelValues...)
+
 	ch <- recordNum(m.errorsRx, ssid.Stats.ErrorsReceived, labelValues...)
+
 	ch <- recordNum(m.errorsTx, ssid.Stats.ErrorsSent, labelValues...)
 }
 
@@ -741,15 +794,20 @@ func (c *collector) updateResources(ch chan<- prometheus.Metric, r *client.Resou
 
 	// these are all in KiB, convert to bytes
 	ch <- recordNum(m.totalMemory, r.TotalMemory*1024)
+
 	ch <- recordNum(m.freeMemory, r.FreeMemory*1024)
+
 	ch <- recordNum(m.availableFlashMemory, r.AvailableFlashMemory*1024)
+
 	ch <- recordNum(m.usedFlashMemory, r.UsedFlashMemory*1024)
 
 	// convert from percentage to decimal
 	ch <- recordNum(m.cpuUsage, float64(r.CPUUsage)/100)
 
 	ch <- recordNum(m.loadAverage, r.LoadAverage)
+
 	ch <- recordNum(m.loadAverage5, r.LoadAverage5)
+
 	ch <- recordNum(m.loadAverage15, r.LoadAverage15)
 
 	for _, proc := range r.ProcessStatus {
@@ -785,10 +843,12 @@ func (c *collector) updateSys(ch chan<- prometheus.Metric, di client.DeviceInfo)
 	ch <- recordNum(m.uptime, di.UpTime)
 
 	ch <- recordNum(m.lastCrashDate, di.CrashHistory.LastCrashDate.Unix())
+
 	ch <- recordNum(m.rebootCount, di.RebootCount)
 
 	// memory is in KiB, convert to bytes
 	ch <- recordNum(m.memoryFreeBytes, di.MemoryStatus.Free*1024)
+
 	ch <- recordNum(m.memoryTotalBytes, di.MemoryStatus.Total*1024)
 
 	ch <- recordNum(m.info, 1, []string{
