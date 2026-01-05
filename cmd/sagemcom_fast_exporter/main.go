@@ -43,6 +43,7 @@ type config struct {
 	Password   string
 	Addr       string
 	LogLevel   string
+	Scraper    string
 	Refresh    time.Duration
 }
 
@@ -73,6 +74,8 @@ func parseFlags(fs *flag.FlagSet, cfg *config) error {
 
 	fs.DurationVar(&cfg.Refresh, "refresh", 1*time.Hour, "Session refresh interval")
 
+	fs.StringVar(&cfg.Scraper, "scraper", "standard", "scraper to use (standard or lite)")
+
 	err := fs.Parse(os.Args[1:])
 	if err != nil {
 		return fmt.Errorf("parse flags: %w", err)
@@ -100,7 +103,14 @@ func run(ctx context.Context, cfg *config) error {
 		Transport: rt,
 	}
 
-	scraper := client.New(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, hc, cfg.Refresh)
+	var scraper client.Scraper
+
+	switch cfg.Scraper {
+	case "lite":
+		scraper = client.NewLite(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, hc, cfg.Refresh)
+	default:
+		scraper = client.New(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, hc, cfg.Refresh)
+	}
 
 	srv := setupServer(ctx, scraper)
 

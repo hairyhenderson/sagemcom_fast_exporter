@@ -56,6 +56,10 @@ type client struct {
 }
 
 func New(host, username, password, authMethod string, hc *http.Client, refresh time.Duration) Scraper {
+	return newClient(host, username, password, authMethod, hc, refresh)
+}
+
+func newClient(host, username, password, authMethod string, hc *http.Client, refresh time.Duration) *client {
 	if hc == nil {
 		hc = http.DefaultClient
 	}
