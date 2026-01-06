@@ -92,6 +92,9 @@ func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse
 
 	for _, action := range reply.Actions {
 		for _, cb := range action.Callbacks {
+			if cb.Result == nil {
+				return nil, fmt.Errorf("failed to fetch device info: nil result for xpath %s", cb.XPath)
+			}
 			if cb.Result.Code != ErrNoError.Code {
 				return nil, fmt.Errorf("failed to fetch device info: %v", cb.Result)
 			}
