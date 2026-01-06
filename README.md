@@ -19,7 +19,11 @@ If you'd like to get an unsupported model working, please file an issue and I'll
 
 ## Installation
 
-You can build a binary for your system with `go install github.com/hairyhenderson/sagemcom_fast_exporter@latest`, or you can use a [pre-built Docker image](https://hub.docker.com/r/hairyhenderson/sagemcom_fast_exporter):
+You can build a binary for your system with
+```console
+go install github.com/hairyhenderson/sagemcom_fast_exporter/cmd/sagemcom_fast_exporter@latest
+```
+or you can use a [pre-built Docker image](https://hub.docker.com/r/hairyhenderson/sagemcom_fast_exporter):
 
 ```console
 $ docker run hairyhenderson/sagemcom_fast_exporter
