@@ -182,7 +182,7 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 
 	for _, action := range reply.Actions {
 		for _, cb := range action.Callbacks {
-			if cb.Result.Code != ErrNoError.Code {
+			if cb.Result == nil || cb.Result.Code != ErrNoError.Code {
 				return nil, fmt.Errorf("non-success result for %s: code=%v", cb.XPath, cb.Result.Code)
 			}
 
