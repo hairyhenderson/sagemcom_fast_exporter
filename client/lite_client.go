@@ -50,6 +50,7 @@ func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse
 	// The xpath parameter is accepted to satisfy the Scraper interface but is not used,
 	// because LiteClient always requests the same predefined XPaths.
 	_ = xpath
+
 	ctx, span := tracer.Start(ctx, "SagemcomClient.GetDeviceInfo")
 	defer span.End()
 
@@ -95,8 +96,9 @@ func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse
 			if cb.Result == nil {
 				return nil, fmt.Errorf("failed to fetch device info: nil result for xpath %s", cb.XPath)
 			}
+
 			if cb.Result.Code != ErrNoError.Code {
-				return nil, fmt.Errorf("failed to fetch device info: %v", cb.Result)
+				return nil, fmt.Errorf("failed to fetch device info for %s: %v", cb.XPath, cb.Result)
 			}
 
 			value := cb.Parameters["value"]
@@ -185,8 +187,12 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 
 	for _, action := range reply.Actions {
 		for _, cb := range action.Callbacks {
-			if cb.Result == nil || cb.Result.Code != ErrNoError.Code {
-				return nil, fmt.Errorf("non-success result for %s: code=%v", cb.XPath, cb.Result.Code)
+			if cb.Result == nil {
+				return nil, fmt.Errorf("failed to fetch resource usage: nil result for xpath %s", cb.XPath)
+			}
+
+			if cb.Result.Code != ErrNoError.Code {
+				return nil, fmt.Errorf("failed to fetch resource usage for %s: %v", cb.XPath, cb.Result)
 			}
 
 			switch cb.XPath {
