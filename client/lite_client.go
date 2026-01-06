@@ -41,8 +41,15 @@ type LiteClient struct {
 
 // GetValue retrieves comprehensive device information including DeviceInfo, WiFi, Ethernet, and Optical data.
 //
+// Note: The LiteClient implementation intentionally ignores the xpath parameter from the
+// Scraper interface. Instead of querying a single XPath, it always fetches a fixed set of
+// XPaths to minimize the number of round-trips to the device.
+//
 //nolint:gocyclo,funlen
-func (c *LiteClient) GetValue(ctx context.Context, _ string) (*ValueResponse, error) {
+func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse, error) {
+	// The xpath parameter is accepted to satisfy the Scraper interface but is not used,
+	// because LiteClient always requests the same predefined XPaths.
+	_ = xpath
 	ctx, span := tracer.Start(ctx, "SagemcomClient.GetDeviceInfo")
 	defer span.End()
 
