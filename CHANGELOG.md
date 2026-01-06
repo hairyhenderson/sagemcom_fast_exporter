@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.3.3](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.2...v0.3.3) (2026-01-06)
+
+
+### Bug Fixes
+
+* **lint:** Various lint fixes ([#174](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/174)) ([b90ecb8](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/b90ecb8af6095033339b7a10f9f5467786f17b2c))
+
+
+### Documentation
+
+* use correct path to install binary with go install ([#175](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/175)) ([258da3f](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/258da3fde45e77cc99c21984d396cc17d114bb63))
+
+
+### Dependencies
+
+* **actions:** Bump golangci/golangci-lint-action from 8 to 9 ([#169](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/169)) ([577c950](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/577c9500cae3d5e524fe55f65fd17dadcff60332))
+* **actions:** Bump the actions group across 1 directory with 3 updates ([#164](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/164)) ([bec3507](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/bec350743b9e7bdf3942d9b101029836d252860a))
+* **docker:** Bump alpine from 3.22 to 3.23 ([#172](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/172)) ([4de5351](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/4de5351e929768f314faa18be2ea076f5afc7828))
+* **docker:** Bump golang from 1.24-alpine to 1.25-alpine ([#160](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/160)) ([f6bc248](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/f6bc2484f40d22f9d1eafecb1affe463195e983d))
+* **go:** Bump github.com/prometheus/common from 0.65.0 to 0.67.5 ([#177](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/177)) ([f729a91](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/f729a91f21f29d25665bbec69dcfe6ec258f350c))
+* **go:** Bump the otel group with 6 updates ([#161](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/161)) ([5ea433c](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/5ea433ce0cee232c41a7d143eb3c270fdfc5245d))
+
 ## [0.3.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.1...v0.3.2) (2025-07-13)
 
 
