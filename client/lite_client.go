@@ -34,7 +34,7 @@ func NewLite(host, username, password, authMethod string, hc *http.Client, refre
 
 var _ Scraper = (*LiteClient)(nil)
 
-// LiteClient is an lite implementation of the Scraper interface.
+// LiteClient is a lite implementation of the Scraper interface.
 type LiteClient struct {
 	*client
 }
