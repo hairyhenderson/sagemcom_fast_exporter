@@ -39,19 +39,11 @@ type LiteClient struct {
 	*client
 }
 
-// GetValue retrieves comprehensive device information including DeviceInfo, WiFi, Ethernet, and Optical data.
-//
-// Note: The LiteClient implementation intentionally ignores the xpath parameter from the
-// Scraper interface. Instead of querying a single XPath, it always fetches a fixed set of
-// XPaths to minimize the number of round-trips to the device.
+// GetDevice retrieves comprehensive device information only including DeviceInfo, WiFi, Ethernet, and Optical data.
 //
 //nolint:gocyclo,funlen
-func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse, error) {
-	// The xpath parameter is accepted to satisfy the Scraper interface but is not used,
-	// because LiteClient always requests the same predefined XPaths.
-	_ = xpath
-
-	ctx, span := tracer.Start(ctx, "SagemcomClient.GetDeviceInfo")
+func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
+	ctx, span := tracer.Start(ctx, "LiteClient.GetDevice")
 	defer span.End()
 
 	actions := []action{
@@ -87,7 +79,7 @@ func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse
 		return nil, errors.New("no reply in result")
 	}
 
-	deviceInfo := ValueResponse{}
+	deviceInfo := DeviceResponse{}
 	// temporary value to unmarshal and copy data
 	d := Device{}
 
@@ -147,7 +139,7 @@ func (c *LiteClient) GetValue(ctx context.Context, xpath string) (*ValueResponse
 //
 //nolint:gocyclo,funlen
 func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, error) {
-	ctx, span := tracer.Start(ctx, "SagemcomClient.GetResourceUsage")
+	ctx, span := tracer.Start(ctx, "LiteClient.GetResourceUsage")
 	defer span.End()
 
 	actions := []action{
