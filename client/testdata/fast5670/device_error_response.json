@@ -1,0 +1,23 @@
+{
+  "reply": {
+    "uid": 0,
+    "id": 1,
+    "error": { "code": 16777216, "description": "XMO_REQUEST_NO_ERR" },
+    "actions": [
+      {
+        "uid": 1,
+        "id": 0,
+        "error": { "code": 16777238, "description": "XMO_NO_ERR" },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": { "code": 100, "description": "ERROR" },
+            "xpath": "Device/DeviceInfo",
+            "parameters": {}
+          }
+        ]
+      }
+    ],
+    "events": []
+  }
+}
