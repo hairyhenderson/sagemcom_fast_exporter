@@ -1,0 +1,115 @@
+{
+  "reply": {
+    "uid": 0,
+    "id": 2,
+    "error": {
+      "code": 16777216,
+      "description": "XMO_REQUEST_NO_ERR"
+    },
+    "actions": [
+      {
+        "uid": 1,
+        "id": 0,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo/MemoryStatus",
+            "parameters": {
+              "value": {
+                "MemoryStatus": {
+                  "Total": 504160,
+                  "Free": 94440,
+                  "CommitLimit": 252080,
+                  "CommittedAS": 136424
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 2,
+        "id": 1,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo/FlashMemoryStatus",
+            "parameters": {
+              "value": {
+                "FlashMemoryStatus": {
+                  "Total": 0,
+                  "Free": 0
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 3,
+        "id": 2,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo/ProcessStatus/LoadAverage",
+            "parameters": {
+              "value": {
+                "LoadAverage": {
+                  "Load1": 2.961426,
+                  "Load5": 2.86084,
+                  "Load15": 2.869141
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 4,
+        "id": 3,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo/ProcessStatus/CPUUsage",
+            "parameters": {
+              "value": 5
+            }
+          }
+        ]
+      }
+    ],
+    "events": []
+  }
+}

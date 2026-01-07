@@ -28,8 +28,8 @@ var tracer = otel.Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/clien
 
 // Scraper is an interface for scraping data from a Sagemcom F@st device
 type Scraper interface {
-	// GetValue retrieves a value from the device using a given XPath.
-	GetValue(ctx context.Context, xpath string) (*ValueResponse, error)
+	// GetDevice retrieves device information from the device.
+	GetDevice(ctx context.Context) (*DeviceResponse, error)
 	// GetResourceUsage retrieves resource usage from the device.
 	GetResourceUsage(ctx context.Context) (*ResourceUsage, error)
 
@@ -56,6 +56,10 @@ type client struct {
 }
 
 func New(host, username, password, authMethod string, hc *http.Client, refresh time.Duration) Scraper {
+	return newClient(host, username, password, authMethod, hc, refresh)
+}
+
+func newClient(host, username, password, authMethod string, hc *http.Client, refresh time.Duration) *client {
 	if hc == nil {
 		hc = http.DefaultClient
 	}
@@ -412,9 +416,17 @@ func (c *client) Logout(ctx context.Context) error {
 	return nil
 }
 
+// GetDeviceInfo retrieves all device information.
+func (c *client) GetDevice(ctx context.Context) (*DeviceResponse, error) {
+	ctx, span := tracer.Start(ctx, "SagemcomClient.GetDevice")
+	defer span.End()
+
+	return c.GetValue(ctx, "Device")
+}
+
 // GetValue - port of python's get_value_by_xpath
 // Retrieve raw value from router using XPath.
-func (c *client) GetValue(ctx context.Context, xpath string) (*ValueResponse, error) {
+func (c *client) GetValue(ctx context.Context, xpath string) (*DeviceResponse, error) {
 	ctx, span := tracer.Start(ctx, "SagemcomClient.GetValue", trace.WithAttributes(
 		attribute.String("xpath", xpath),
 	))
@@ -447,7 +459,7 @@ func (c *client) GetValue(ctx context.Context, xpath string) (*ValueResponse, er
 		value := action.Callbacks[0].Parameters["value"]
 
 		// now we need to convert the value to a *valueResponse
-		vr := ValueResponse{}
+		vr := DeviceResponse{}
 
 		err = json.Unmarshal(value, &vr)
 		if err != nil {

@@ -2924,9 +2924,9 @@ type SSID struct {
 	ResetStats     bool `json:"ResetStats,omitempty"`
 }
 
-// ValueResponse represents the full response from the router from the getValue
+// DeviceResponse represents the full response from the router from the getValue
 // method
-type ValueResponse struct {
+type DeviceResponse struct {
 	Device Device `json:"Device,omitempty"`
 }
 

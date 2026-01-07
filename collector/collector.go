@@ -562,7 +562,7 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 
 	slog.DebugContext(ctx, "getting Device value")
 
-	v, err := c.scraper.GetValue(ctx, "Device")
+	v, err := c.scraper.GetDevice(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "update getValue errored", "err", err)
 
