@@ -29,6 +29,8 @@ func createLiteClientToTestServer(t *testing.T, mockData string) *LiteClient {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		payload := map[string]requestBody{}
 
+		r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // limit request body to 1MB. linter is happy
+
 		err := json.Unmarshal([]byte(r.FormValue("req")), &payload)
 		if err != nil {
 			t.Fatalf("failed to unmarshal request body: %v", err)
