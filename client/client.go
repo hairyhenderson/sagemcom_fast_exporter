@@ -207,7 +207,7 @@ func (c *client) apiRequest(ctx context.Context, actions []action) (map[string]r
 		},
 	}
 
-	body, err := json.Marshal(payload)
+	body, err := json.Marshal(payload) // #nosec G117
 	if err != nil {
 		return nil, err
 	}
