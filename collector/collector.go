@@ -310,7 +310,8 @@ func initOpticalMetrics(ns string) opticalMetrics {
 
 //nolint:funlen
 func initResourcesMetrics(ns string) resourcesMetrics {
-	procLabels := []string{"name", "pid"}
+	procLabels := make([]string, 0, 4)
+	procLabels = append(procLabels, "name", "pid")
 
 	subsys := "resources"
 
@@ -412,7 +413,8 @@ func initSysMetrics(ns string) sysMetrics {
 }
 
 func initWiFiRadioMetrics(ns string) wifiRadioMetrics {
-	radioLabels := []string{"name", "alias"}
+	radioLabels := make([]string, 0, 5)
+	radioLabels = append(radioLabels, "name", "alias")
 
 	subsys := "wifi_radio"
 
@@ -454,7 +456,8 @@ func initWiFiRadioMetrics(ns string) wifiRadioMetrics {
 }
 
 func initWiFiSSIDMetrics(ns string) wifiSSIDMetrics {
-	ssidLabels := []string{"name", "alias", "ssid", "radio"}
+	ssidLabels := make([]string, 0, 6)
+	ssidLabels = append(ssidLabels, "name", "alias", "ssid", "radio")
 
 	subsys := "wifi_ssid"
 
@@ -636,7 +639,8 @@ func statusNum(status string) int {
 
 func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface client.EthernetInterface) {
 	m := c.ethernet
-	labelValues := []string{iface.IfcName, iface.Alias}
+	labelValues := make([]string, 0, 7)
+	labelValues = append(labelValues, iface.IfcName, iface.Alias)
 
 	// convert from Mbps to bps
 	bitrate := iface.CurrentBitRate * 1000 * 1000
@@ -676,7 +680,8 @@ func (c *collector) updateEthernet(ch chan<- prometheus.Metric, iface client.Eth
 
 func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface client.OpticalInterface) {
 	m := c.optical
-	labelValues := []string{iface.IfcName, iface.Alias}
+	labelValues := make([]string, 0, 6)
+	labelValues = append(labelValues, iface.IfcName, iface.Alias)
 
 	// stats metrics
 	ch <- recordNum(m.bcastPacketsRx, iface.Stats.BroadcastPacketsReceived, labelValues...)
@@ -731,7 +736,9 @@ func (c *collector) updateOptical(ch chan<- prometheus.Metric, iface client.Opti
 func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio client.Radio) {
 	m := c.wifiRadio
 
-	labelValues := []string{radio.IfcName, radio.Alias}
+	labelValues := make([]string, 0, 5)
+	labelValues = append(labelValues, radio.IfcName, radio.Alias)
+
 	ch <- recordNum(m.radioInfo, 1, append(labelValues, radio.RegulatoryDomain, radio.SupportedStandards, radio.SupportedChannelBandwidth)...)
 
 	ch <- recordNum(m.radioStatus, statusNum(radio.Status), labelValues...)
@@ -754,7 +761,8 @@ func (c *collector) updateWiFiRadio(ch chan<- prometheus.Metric, radio client.Ra
 func (c *collector) updateWiFiSSID(ch chan<- prometheus.Metric, ssid client.SSID, radioNameToIfcName map[string]string) {
 	m := c.wifiSSID
 
-	labelValues := []string{ssid.IfcName, ssid.Alias, ssid.SSID, radioNameToIfcName[ssid.LowerLayers]}
+	labelValues := make([]string, 0, 6)
+	labelValues = append(labelValues, ssid.IfcName, ssid.Alias, ssid.SSID, radioNameToIfcName[ssid.LowerLayers])
 
 	ch <- recordNum(m.ssidInfo, 1, append(labelValues, ssid.Status, ssid.MACAddress)...)
 
@@ -811,7 +819,8 @@ func (c *collector) updateResources(ch chan<- prometheus.Metric, r *client.Resou
 	ch <- recordNum(m.loadAverage15, r.LoadAverage15)
 
 	for _, proc := range r.ProcessStatus {
-		procLabels := []string{proc.ProcessName, strconv.Itoa(proc.PID)}
+		procLabels := make([]string, 0, 4)
+		procLabels = append(procLabels, proc.ProcessName, strconv.Itoa(proc.PID))
 		// size is in KiB, convert to bytes
 		ch <- recordNum(m.processSize, proc.Size*1024, procLabels...)
 
