@@ -1,0 +1,244 @@
+{
+  "reply": {
+    "uid": 0,
+    "id": 1,
+    "error": {
+      "code": 16777216,
+      "description": "XMO_REQUEST_NO_ERR"
+    },
+    "actions": [
+      {
+        "uid": 1,
+        "id": 0,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo",
+            "parameters": {
+              "value": {
+                "DeviceInfo": {
+                  "Manufacturer": "SagemCom",
+                  "ManufacturerOUI": "AABBCC",
+                  "ModelName": "Fast5670_ABRV",
+                  "HardwareVersion": "2.02",
+                  "SoftwareVersion": "SGFc",
+                  "MACAddress": "AA:BB:CC:DD:EE:FF",
+                  "Mode": "GW",
+                  "Country": "XX",
+                  "CustomerModelName": "Fast5670",
+                  "RouterName": "TestRouter",
+                  "ReleaseDate": "1-01-01T00:00:00+0000",
+                  "BuildDate": "2022-08-10T02:18:11+0000",
+                  "UpTime": 3455043
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 2,
+        "id": 1,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/WiFi",
+            "parameters": {
+              "value": {
+                "WiFi": {
+                  "AccessPoints": [
+                    {
+                      "uid": 1,
+                      "XmoConfVersion": 4,
+                      "Enable": false,
+                      "Status": "DISABLED"
+                    }
+                  ],
+                  "Radios": [
+                    {
+                      "uid": 1,
+                      "Enable": true,
+                      "StoppedBy": "",
+                      "Status": "UP",
+                      "Alias": "RADIO2G4",
+                      "Name": "Device/WiFi/Radios/Radio[RADIO2G4]",
+                      "LastChange": 3454993,
+                      "Stats": {
+                        "BytesSent": "295299526388",
+                        "BytesReceived": "30424922512",
+                        "PacketsSent": "245241074",
+                        "PacketsReceived": "66907398",
+                        "ErrorsSent": 0,
+                        "ErrorsReceived": 0,
+                        "DiscardPacketsSent": 0,
+                        "DiscardPacketsReceived": 0,
+                        "CollisionsPackets": 0,
+                        "PLCPErrorCount": 0,
+                        "FCSErrorCount": 0,
+                        "InvalidMACCount": 0,
+                        "PacketsOtherReceived": 0,
+                        "Noise": -93,
+                        "SampleCount": 0,
+                        "Vo_count": "0",
+                        "Vi_count": "0",
+                        "Be_count": "0",
+                        "BK_count": "0",
+                        "Cab_count": "0",
+                        "Bcn_count": "0",
+                        "Active": "0",
+                        "Opertxpower": 0
+                      }
+                    }
+                  ],
+                  "SSIDs": [
+                    {
+                      "uid": 1,
+                      "Enable": false,
+                      "StoppedBy": "",
+                      "Status": "DOWN",
+                      "Alias": "WL_PRIV",
+                      "Name": "Device/WiFi/SSIDs/SSID[WL_PRIV]",
+                      "LastChange": 0,
+                      "LowerLayers": "Device/WiFi/Radios/Radio[RADIO2G4]"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 3,
+        "id": 2,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/Ethernet",
+            "parameters": {
+              "value": {
+                "Ethernet": {
+                  "Interfaces": [
+                    {
+                      "uid": 1,
+                      "Enable": true,
+                      "StoppedBy": "",
+                      "Status": "UP",
+                      "Alias": "PHY1",
+                      "Name": "Device/Ethernet/Interfaces/Interface[PHY1]",
+                      "LastChange": 61987,
+                      "LowerLayers": "",
+                      "IfcName": "eth0",
+                      "Role": "LAN",
+                      "Stats": {
+                        "BytesSent": "3575853623",
+                        "BytesReceived": "4537386381",
+                        "PacketsSent": "4028072",
+                        "PacketsReceived": "1399446",
+                        "ErrorsSent": 0,
+                        "ErrorsReceived": 0,
+                        "DiscardPacketsSent": 0,
+                        "DiscardPacketsReceived": 0,
+                        "CollisionsPackets": 0,
+                        "UnicastPacketsSent": "3750895",
+                        "UnicastPacketsReceived": "1355371",
+                        "MulticastPacketsSent": "257661",
+                        "MulticastPacketsReceived": "36387",
+                        "BroadcastPacketsSent": "19516",
+                        "BroadcastPacketsReceived": "7688",
+                        "UnknownProtoPacketsReceived": 0,
+                        "RetransCount": 0
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "uid": 4,
+        "id": 3,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/Optical",
+            "parameters": {
+              "value": {
+                "Optical": {
+                  "Interfaces": [
+                    {
+                      "uid": 1,
+                      "Enable": true,
+                      "StoppedBy": "",
+                      "Status": "UP",
+                      "Alias": "OPTICAL0",
+                      "Name": "Device/Optical/Interfaces/Interface[OPTICAL0]",
+                      "LastChange": 3454986,
+                      "LowerLayers": "",
+                      "IfcName": "veip0",
+                      "LastStatsReset": 0,
+                      "ResetStats": false,
+                      "Upstream": false,
+                      "Temperature": 33167,
+                      "Stats": {
+                        "BytesSent": "31177312452",
+                        "BytesReceived": "300768716543",
+                        "PacketsSent": 70828933,
+                        "PacketsReceived": 255481372,
+                        "ErrorsSent": 0,
+                        "ErrorsReceived": 0,
+                        "DiscardChecksumReceived": 0,
+                        "DiscardSequenceNumberReceived": 0,
+                        "UnicastPacketsSent": 70809721,
+                        "UnicastPacketsReceived": 255481370,
+                        "MulticastPacketsSent": 0,
+                        "MulticastPacketsReceived": 0,
+                        "BroadcastPacketsSent": 19212,
+                        "BroadcastPacketsReceived": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "events": []
+  }
+}
