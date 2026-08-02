@@ -14,6 +14,8 @@ var (
 	authSuccessResponse string
 	//go:embed testdata/fast5670/device_success_response.json
 	deviceSuccessResponse string
+	//go:embed testdata/fast5670/device_sentinel_timestamp_response.json
+	deviceSentinelTimestampResponse string
 	//go:embed testdata/fast5670/device_error_response.json
 	deviceErrorResponse string
 	//go:embed testdata/fast5670/resource_usage_success_response.json
@@ -104,6 +106,37 @@ func TestLiteClientGetDevice(t *testing.T) {
 
 	if len(device.Optical.Interfaces) != 1 {
 		t.Errorf("Optical Interfaces are missing")
+	}
+}
+
+// TestLiteClientGetDeviceSentinelTimestamps tests that the router's "never set"
+// timestamps survive the round trip through GetDevice as the zero time.
+func TestLiteClientGetDeviceSentinelTimestamps(t *testing.T) {
+	t.Parallel()
+
+	lc := createLiteClientToTestServer(t, deviceSentinelTimestampResponse)
+
+	result, err := lc.GetDevice(t.Context())
+	if err != nil {
+		t.Fatalf("GetDevice failed: %v", err)
+	}
+
+	di := result.Device.DeviceInfo
+
+	if di.FirstUseDate != (time.Time{}) {
+		t.Errorf("FirstUseDate = %v, want the zero time", di.FirstUseDate)
+	}
+
+	if di.BackupTimeStamp != (time.Time{}) {
+		t.Errorf("BackupTimeStamp = %v, want the zero time", di.BackupTimeStamp)
+	}
+
+	if di.CrashHistory.LastCrashDate != (time.Time{}) {
+		t.Errorf("LastCrashDate = %v, want the zero time", di.CrashHistory.LastCrashDate)
+	}
+
+	if want := time.Date(2022, 8, 10, 2, 18, 11, 0, time.UTC); !di.BuildDate.Equal(want) {
+		t.Errorf("BuildDate = %v, want %v", di.BuildDate, want)
 	}
 }
 

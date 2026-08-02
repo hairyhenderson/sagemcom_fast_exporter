@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -97,12 +96,6 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 
 			switch cb.XPath {
 			case xpathDeviceInfo:
-				// replace invalid time format
-				value = bytes.ReplaceAll(value,
-					[]byte("1-01-01T00:00:00+0000"),
-					[]byte("0001-01-01T00:00:00+0000"),
-				)
-
 				err = json.Unmarshal(value, &deviceInfo.Device)
 				if err != nil {
 					return nil, fmt.Errorf("failed to decode %s: %w", cb.XPath, err)

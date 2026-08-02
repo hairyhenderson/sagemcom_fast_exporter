@@ -1,0 +1,47 @@
+{
+  "reply": {
+    "uid": 0,
+    "id": 1,
+    "error": {
+      "code": 16777216,
+      "description": "XMO_REQUEST_NO_ERR"
+    },
+    "actions": [
+      {
+        "uid": 1,
+        "id": 0,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/DeviceInfo",
+            "parameters": {
+              "value": {
+                "DeviceInfo": {
+                  "Manufacturer": "SagemCom",
+                  "ModelName": "Fast5670_ABRV",
+                  "ReleaseDate": "1-01-01T00:00:00+0000",
+                  "FirstUseDate": "1-01-01T00:00:00+0000",
+                  "BackupTimeStamp": "0-01-01T00:00:00+0000",
+                  "BuildDate": "2022-08-10T02:18:11Z",
+                  "UpTime": 3455043,
+                  "CrashHistory": {
+                    "LastCrashDate": "1-01-01T00:00:00+0000",
+                    "NumberOfCrash": 0
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
