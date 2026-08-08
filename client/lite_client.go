@@ -88,7 +88,9 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 				return nil, fmt.Errorf("failed to fetch device info: nil result for xpath %s", cb.XPath)
 			}
 
-			if cb.Result.Code != ErrNoError.Code {
+			// compare by description, not code: some firmware reports
+			// XMO_NO_ERR with a code other than ErrNoError.Code
+			if cb.Result.Description != ErrNoError.Description {
 				return nil, fmt.Errorf("failed to fetch device info for %s: %v", cb.XPath, cb.Result)
 			}
 
@@ -176,7 +178,9 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 				return nil, fmt.Errorf("failed to fetch resource usage: nil result for xpath %s", cb.XPath)
 			}
 
-			if cb.Result.Code != ErrNoError.Code {
+			// compare by description, not code: some firmware reports
+			// XMO_NO_ERR with a code other than ErrNoError.Code
+			if cb.Result.Description != ErrNoError.Description {
 				return nil, fmt.Errorf("failed to fetch resource usage for %s: %v", cb.XPath, cb.Result)
 			}
 
