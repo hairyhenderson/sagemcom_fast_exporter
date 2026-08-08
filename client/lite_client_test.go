@@ -5,9 +5,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
+
+// withAltNoErrCode rewrites the XMO_NO_ERR code in a canned response to the one
+// some firmware (such as the F@st 5690) reports instead. The description is left
+// alone, so the response still says there was no error.
+func withAltNoErrCode(response string) string {
+	return strings.ReplaceAll(response, `"code": 16777238`, `"code": 16777239`)
+}
 
 var (
 	//go:embed testdata/fast5670/auth_success_response.json
@@ -140,6 +148,27 @@ func TestLiteClientGetDeviceSentinelTimestamps(t *testing.T) {
 	}
 }
 
+// TestLiteClientGetDeviceAltNoErrCode tests that a callback reporting XMO_NO_ERR
+// under a code other than ErrNoError.Code is still treated as a success.
+func TestLiteClientGetDeviceAltNoErrCode(t *testing.T) {
+	t.Parallel()
+
+	lc := createLiteClientToTestServer(t, withAltNoErrCode(deviceSuccessResponse))
+
+	result, err := lc.GetDevice(t.Context())
+	if err != nil {
+		t.Fatalf("GetDevice failed: %v", err)
+	}
+
+	if result.Device.DeviceInfo.Manufacturer != "SagemCom" {
+		t.Errorf("want Manufacturer 'SagemCom', got '%s'", result.Device.DeviceInfo.Manufacturer)
+	}
+
+	if len(result.Device.WiFi.Radios) != 1 {
+		t.Errorf("WiFi Radios are missing")
+	}
+}
+
 // TestLiteClientGetResourceUsage tests the GetResourceUsage method.
 func TestLiteClientGetResourceUsage(t *testing.T) {
 	t.Parallel()
@@ -178,6 +207,28 @@ func TestLiteClientGetResourceUsage(t *testing.T) {
 	}
 
 	// Verify CPU usage
+	if result.CPUUsage != 5 {
+		t.Errorf("want CPUUsage 5, got %d", result.CPUUsage)
+	}
+}
+
+// TestLiteClientGetResourceUsageAltNoErrCode tests that a callback reporting
+// XMO_NO_ERR under a code other than ErrNoError.Code is still treated as a
+// success.
+func TestLiteClientGetResourceUsageAltNoErrCode(t *testing.T) {
+	t.Parallel()
+
+	lc := createLiteClientToTestServer(t, withAltNoErrCode(resourceUsageSuccessResponse))
+
+	result, err := lc.GetResourceUsage(t.Context())
+	if err != nil {
+		t.Fatalf("GetResourceUsage failed: %v", err)
+	}
+
+	if result.TotalMemory != 504160 {
+		t.Errorf("want TotalMemory 504160, got %d", result.TotalMemory)
+	}
+
 	if result.CPUUsage != 5 {
 		t.Errorf("want CPUUsage 5, got %d", result.CPUUsage)
 	}
