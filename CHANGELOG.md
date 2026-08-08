@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.4.0...v0.4.1) (2026-08-08)
+
+
+### Dependencies
+
+* **actions:** bump docker/login-action from 4 to 4.5.2 ([#218](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/218)) ([4900d28](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/4900d2853a1559691415a8fed7371cbdb3d18441))
+* **actions:** bump docker/login-action from 4.5.2 to 4.6.0 ([#220](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/220)) ([bf6e665](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/bf6e6652d7de85b54bbcc9a721dba4f3e87f86d1))
+* **actions:** bump googleapis/release-please-action from 4 to 5 ([#198](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/198)) ([c53e74e](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/c53e74e093d0c075cac2d7f0712b9aa8e4a45e7d))
+* **actions:** bump the actions group across 1 directory with 3 updates ([#214](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/214)) ([9f579d2](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/9f579d22eebed4be94b1717ed2d9733d3c75a02e))
+* **actions:** bump webiny/action-conventional-commits ([#199](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/199)) ([25cd5e2](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/25cd5e2e7b0b242fadf35bf0a0cb004a15d93413))
+* **docker:** bump alpine from 3.23 to 3.24 ([#207](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/207)) ([24f20d3](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/24f20d38c6466f1fdf9905db90dd9e7ac1735d0a))
+* **go:** bump github.com/prometheus/client_golang from 1.23.2 to 1.24.1 ([#216](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/216)) ([2ce9b3b](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/2ce9b3b6b7b4c52fe7bca2385f09dec27d4db7de))
+* **go:** bump google.golang.org/grpc from 1.80.0 to 1.82.1 ([#217](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/217)) ([93fc6c5](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/93fc6c5760b35a8601f387bbc6069d8a077ade56))
+* **go:** bump the otel group across 1 directory with 6 updates ([#193](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/193)) ([a520a60](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/a520a60011f5fa7600da9d9ddd4c2b9d612f1254))
+* **go:** bump the otel group across 1 directory with 6 updates ([#202](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/202)) ([4f76707](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/4f7670764017711d3bd922eff1965526a6662306))
+
 ## [0.4.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.3.3...v0.4.0) (2026-03-19)
 
 
