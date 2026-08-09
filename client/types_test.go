@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -28,6 +29,29 @@ func TestRadioUnmarshalJSON(t *testing.T) {
 
 	if want := int64(300 * 1024 * 1024); r.MaxBitRate != want {
 		t.Errorf("MaxBitRate = %d, want %d", r.MaxBitRate, want)
+	}
+}
+
+// TestRadioUnmarshalJSONNull verifies that a null radio decodes to zero.
+func TestRadioUnmarshalJSONNull(t *testing.T) {
+	t.Parallel()
+
+	const data = `{"Radios": [null]}`
+
+	var wifi struct {
+		Radios []Radio
+	}
+
+	if err := json.Unmarshal([]byte(data), &wifi); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if len(wifi.Radios) != 1 {
+		t.Fatalf("Radios = %d, want 1", len(wifi.Radios))
+	}
+
+	if want := (Radio{}); !reflect.DeepEqual(wifi.Radios[0], want) {
+		t.Errorf("Radios[0] = %+v, want the zero value", wifi.Radios[0])
 	}
 }
 

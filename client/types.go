@@ -2877,7 +2877,7 @@ type Radio struct {
 func (r *Radio) UnmarshalJSON(data []byte) error {
 	type alias Radio
 
-	aux := &struct {
+	aux := struct {
 		*alias
 		CurrentOperatingChannelBandwidth string `json:"CurrentOperatingChannelBandwidth"`
 		TransmitPower                    int    `json:"TransmitPower"`
