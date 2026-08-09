@@ -82,7 +82,7 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 	// temporary value to unmarshal and copy data
 	d := Device{}
 
-	for _, action := range reply.Actions {
+	for _, action := range succeededActions(reply.Actions) {
 		for _, cb := range action.Callbacks {
 			if cb.Result == nil {
 				return nil, fmt.Errorf("failed to fetch device info: nil result for xpath %s", cb.XPath)
@@ -172,7 +172,7 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 
 	ru := ResourceUsage{}
 
-	for _, action := range reply.Actions {
+	for _, action := range succeededActions(reply.Actions) {
 		for _, cb := range action.Callbacks {
 			if cb.Result == nil {
 				return nil, fmt.Errorf("failed to fetch resource usage: nil result for xpath %s", cb.XPath)
@@ -242,4 +242,19 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 	}
 
 	return &ru, nil
+}
+
+// succeededActions filters out the actions the router rejected. apiRequest has
+// already decided those errors aren't fatal (an unimplemented xpath, say), and
+// their callbacks carry no usable value.
+func succeededActions(actions []actionResp) []actionResp {
+	succeeded := make([]actionResp, 0, len(actions))
+
+	for _, a := range actions {
+		if a.Error == nil || errors.Is(a.Error, ErrNoError) {
+			succeeded = append(succeeded, a)
+		}
+	}
+
+	return succeeded
 }

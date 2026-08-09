@@ -28,6 +28,8 @@ var (
 	deviceErrorResponse string
 	//go:embed testdata/fast5670/resource_usage_success_response.json
 	resourceUsageSuccessResponse string
+	//go:embed testdata/fast5670/resource_usage_unknown_path_response.json
+	resourceUsageUnknownPathResponse string
 	//go:embed testdata/fast5670/resource_usage_error_response.json
 	resourceUsageErrorResponse string
 )
@@ -231,6 +233,84 @@ func TestLiteClientGetResourceUsageAltNoErrCode(t *testing.T) {
 
 	if result.CPUUsage != 5 {
 		t.Errorf("want CPUUsage 5, got %d", result.CPUUsage)
+	}
+}
+
+// TestLiteClientGetResourceUsageUnknownPath tests that XPaths the device
+// doesn't implement are skipped rather than failing the whole request. The
+// F@st 5690 has no Device/DeviceInfo/ProcessStatus/LoadAverage or CPUUsage,
+// but still reports memory and flash usage.
+func TestLiteClientGetResourceUsageUnknownPath(t *testing.T) {
+	t.Parallel()
+
+	lc := createLiteClientToTestServer(t, resourceUsageUnknownPathResponse)
+
+	result, err := lc.GetResourceUsage(t.Context())
+	if err != nil {
+		t.Fatalf("GetResourceUsage failed: %v", err)
+	}
+
+	if result.TotalMemory != 504160 {
+		t.Errorf("want TotalMemory 504160, got %d", result.TotalMemory)
+	}
+
+	if result.FreeMemory != 94440 {
+		t.Errorf("want FreeMemory 94440, got %d", result.FreeMemory)
+	}
+
+	if result.AvailableFlashMemory != 65536 {
+		t.Errorf("want AvailableFlashMemory 65536, got %d", result.AvailableFlashMemory)
+	}
+
+	// the unimplemented XPaths simply leave their values unset
+	if result.LoadAverage != 0 {
+		t.Errorf("want LoadAverage 0, got %f", result.LoadAverage)
+	}
+
+	if result.CPUUsage != 0 {
+		t.Errorf("want CPUUsage 0, got %d", result.CPUUsage)
+	}
+}
+
+// TestLiteClientActionErrorNamesXPath tests that an action error identifies the
+// XPath that failed, instead of only repeating the error code, and that an
+// error other than an unknown XPath still fails the request even when an
+// unknown XPath is reported alongside it.
+func TestLiteClientActionErrorNamesXPath(t *testing.T) {
+	t.Parallel()
+
+	const response = `{
+		"reply": {
+			"uid": 0,
+			"id": 2,
+			"error": {"code": 16777236, "description": "XMO_REQUEST_ACTION_ERR"},
+			"actions": [
+				{
+					"uid": 1,
+					"id": 1,
+					"error": {"code": 1, "description": "XMO_ACCESS_RESTRICTION_ERR"},
+					"callbacks": []
+				},
+				{
+					"uid": 2,
+					"id": 3,
+					"error": {"code": 16777243, "description": "XMO_UNKNOWN_PATH_ERR"},
+					"callbacks": []
+				}
+			]
+		}
+	}`
+
+	lc := createLiteClientToTestServer(t, response)
+
+	_, err := lc.GetResourceUsage(t.Context())
+	if err == nil {
+		t.Fatal("want error for restricted path response, but got none")
+	}
+
+	// action ID 1 is the flash memory XPath
+	if !strings.Contains(err.Error(), xpathFlashMemoryStatus) {
+		t.Errorf("error %q does not name the failing XPath %q", err, xpathFlashMemoryStatus)
 	}
 }
 
