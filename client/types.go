@@ -2850,12 +2850,16 @@ type Radio struct {
 func (r *Radio) UnmarshalJSON(data []byte) error {
 	type alias Radio
 
-	aux := &struct {
+	aux := struct {
 		*alias
 		CurrentOperatingChannelBandwidth string `json:"CurrentOperatingChannelBandwidth"`
 		TransmitPower                    int    `json:"TransmitPower"`
 	}{
 		alias: (*alias)(r),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
 	}
 
 	if aux.CurrentOperatingChannelBandwidth != "" {
@@ -2874,10 +2878,6 @@ func (r *Radio) UnmarshalJSON(data []byte) error {
 
 	// Convert TransmitPower from a percentage out of 100 to a ratio out of 1
 	r.TransmitPower = float64(aux.TransmitPower) / 100
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -2935,12 +2935,18 @@ func parseTimestamp(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 
-	if strings.HasPrefix(s, "0-") {
-		// special-case for year 0
-		s = "000" + s
+	// Router uses "0-..." (year 0) and "1-..." (year 1) as "never set" sentinels.
+	if strings.HasPrefix(s, "0-") || strings.HasPrefix(s, "1-") {
+		return time.Time{}, nil
 	}
 
-	return time.Parse("2006-01-02T15:04:05-0700", s)
+	t, err := time.Parse("2006-01-02T15:04:05-0700", s)
+	if err != nil {
+		// Also accept RFC 3339 (Z suffix), used by some router firmware versions.
+		t, err = time.Parse(time.RFC3339, s)
+	}
+
+	return t, err
 }
 
 func (d *DeviceInfo) UnmarshalJSON(b []byte) error {

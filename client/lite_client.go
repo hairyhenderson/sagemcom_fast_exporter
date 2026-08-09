@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -83,13 +82,15 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 	// temporary value to unmarshal and copy data
 	d := Device{}
 
-	for _, action := range reply.Actions {
+	for _, action := range succeededActions(reply.Actions) {
 		for _, cb := range action.Callbacks {
 			if cb.Result == nil {
 				return nil, fmt.Errorf("failed to fetch device info: nil result for xpath %s", cb.XPath)
 			}
 
-			if cb.Result.Code != ErrNoError.Code {
+			// compare by description, not code: some firmware reports
+			// XMO_NO_ERR with a code other than ErrNoError.Code
+			if cb.Result.Description != ErrNoError.Description {
 				return nil, fmt.Errorf("failed to fetch device info for %s: %v", cb.XPath, cb.Result)
 			}
 
@@ -97,12 +98,6 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 
 			switch cb.XPath {
 			case xpathDeviceInfo:
-				// replace invalid time format
-				value = bytes.ReplaceAll(value,
-					[]byte("1-01-01T00:00:00+0000"),
-					[]byte("0001-01-01T00:00:00+0000"),
-				)
-
 				err = json.Unmarshal(value, &deviceInfo.Device)
 				if err != nil {
 					return nil, fmt.Errorf("failed to decode %s: %w", cb.XPath, err)
@@ -177,13 +172,15 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 
 	ru := ResourceUsage{}
 
-	for _, action := range reply.Actions {
+	for _, action := range succeededActions(reply.Actions) {
 		for _, cb := range action.Callbacks {
 			if cb.Result == nil {
 				return nil, fmt.Errorf("failed to fetch resource usage: nil result for xpath %s", cb.XPath)
 			}
 
-			if cb.Result.Code != ErrNoError.Code {
+			// compare by description, not code: some firmware reports
+			// XMO_NO_ERR with a code other than ErrNoError.Code
+			if cb.Result.Description != ErrNoError.Description {
 				return nil, fmt.Errorf("failed to fetch resource usage for %s: %v", cb.XPath, cb.Result)
 			}
 
@@ -245,4 +242,19 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 	}
 
 	return &ru, nil
+}
+
+// succeededActions filters out the actions the router rejected. apiRequest has
+// already decided those errors aren't fatal (an unimplemented xpath, say), and
+// their callbacks carry no usable value.
+func succeededActions(actions []actionResp) []actionResp {
+	succeeded := make([]actionResp, 0, len(actions))
+
+	for _, a := range actions {
+		if a.Error == nil || errors.Is(a.Error, ErrNoError) {
+			succeeded = append(succeeded, a)
+		}
+	}
+
+	return succeeded
 }
