@@ -258,24 +258,69 @@ func (c *client) apiRequest(ctx context.Context, actions []action) (map[string]r
 
 	// Error in one of the actions
 	if errors.Is(err, ErrRequestAction) {
-		var errs []error
+		errs := actionErrors(actions, reply.Actions)
 
-		for _, action := range reply.Actions {
-			if action.Error != nil {
-				if errors.Is(action.Error, ErrNoError) {
-					continue
-				}
-
-				errs = append(errs, action.Error)
-			}
+		if fatal := withoutUnknownPaths(errs); len(fatal) > 0 {
+			return result, fmt.Errorf("action error(s): %w", errors.Join(fatal...))
 		}
 
+		// An unknown path just means this device doesn't implement that part
+		// of the data model, so report whatever it did return instead of
+		// failing the whole request. Retrying wouldn't help either.
 		if len(errs) > 0 {
-			return result, fmt.Errorf("action error(s): %w", errors.Join(errs...))
+			slog.WarnContext(ctx, "ignoring unimplemented xpath(s)", slog.Any("err", errors.Join(errs...)))
+
+			return result, nil
 		}
 	}
 
 	return result, fmt.Errorf("unknown error: %w", err)
+}
+
+// withoutUnknownPaths returns the errors that aren't XMO_UNKNOWN_PATH_ERR.
+func withoutUnknownPaths(errs []error) []error {
+	fatal := make([]error, 0, len(errs))
+
+	for _, err := range errs {
+		if !errors.Is(err, ErrUnknownPath) {
+			fatal = append(fatal, err)
+		}
+	}
+
+	return fatal
+}
+
+// actionErrors collects the errors reported by individual actions, naming each
+// one by the XPath that was requested, so that a failure identifies the path
+// the router rejected. Actions without an XPath (such as logIn) are named by
+// their method instead.
+func actionErrors(requested []action, responses []actionResp) []error {
+	xpaths := make(map[int]string, len(requested))
+
+	for _, a := range requested {
+		if a.XPath != "" {
+			xpaths[a.ID] = a.XPath
+		} else {
+			xpaths[a.ID] = a.Method
+		}
+	}
+
+	var errs []error
+
+	for _, a := range responses {
+		if a.Error == nil || errors.Is(a.Error, ErrNoError) {
+			continue
+		}
+
+		name, ok := xpaths[a.ID]
+		if !ok {
+			name = fmt.Sprintf("action %d", a.ID)
+		}
+
+		errs = append(errs, fmt.Errorf("%s: %w", name, a.Error))
+	}
+
+	return errs
 }
 
 // loginAction - generate the login action
