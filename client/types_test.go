@@ -8,6 +8,8 @@ import (
 )
 
 func TestRadioUnmarshalJSON(t *testing.T) {
+	t.Parallel()
+
 	const data = `{
 		"CurrentOperatingChannelBandwidth": "40MHz",
 		"TransmitPower": 75,
@@ -56,6 +58,8 @@ func TestRadioUnmarshalJSONNull(t *testing.T) {
 }
 
 func TestParseTimestamp(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		in      string
