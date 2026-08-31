@@ -82,11 +82,6 @@ func TestParseTimestamp(t *testing.T) {
 			want: time.Time{},
 		},
 		{
-			name: "zero-padded year 1",
-			in:   "0001-01-01T00:00:00+0000",
-			want: time.Time{},
-		},
-		{
 			name: "rfc3339 with Z suffix",
 			in:   "2024-03-05T12:34:56Z",
 			want: time.Date(2024, 3, 5, 12, 34, 56, 0, time.UTC),
@@ -128,6 +123,13 @@ func TestParseTimestampSentinels(t *testing.T) {
 		"1-01-01T00:00:00+0000",
 		"1-01-01T00:00:00Z",
 		"1-01-01T00:00:00-0500",
+		"1-01-01T00:00:00+0500",
+		// zero-padded, which parses rather than failing the year check. A
+		// positive offset puts the UTC instant back in year 0.
+		"0001-01-01T00:00:00+0000",
+		"0001-01-01T00:00:00Z",
+		"0001-01-01T00:00:00-0500",
+		"0001-01-01T00:00:00+0500",
 	}
 
 	for _, in := range inputs {

@@ -2935,7 +2935,8 @@ func parseTimestamp(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 
-	// Router uses "0-..." (year 0) and "1-..." (year 1) as "never set" sentinels.
+	// Router uses "0-..." (year 0) and "1-..." (year 1) as "never set"
+	// sentinels. Neither parses, as the layout wants a 4 digit year.
 	if strings.HasPrefix(s, "0-") || strings.HasPrefix(s, "1-") {
 		return time.Time{}, nil
 	}
@@ -2946,7 +2947,18 @@ func parseTimestamp(s string) (time.Time, error) {
 		t, err = time.Parse(time.RFC3339, s)
 	}
 
-	return t, err
+	if err != nil {
+		return t, err
+	}
+
+	// A zero-padded year is the same sentinel, and parses. Normalize it, so
+	// that the offset the router happened to send can't turn "never set" into
+	// a real timestamp.
+	if t.Year() <= 1 {
+		return time.Time{}, nil
+	}
+
+	return t, nil
 }
 
 func (d *DeviceInfo) UnmarshalJSON(b []byte) error {
