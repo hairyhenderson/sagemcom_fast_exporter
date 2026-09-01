@@ -57,6 +57,50 @@ func TestRadioUnmarshalJSONNull(t *testing.T) {
 	}
 }
 
+// TestRadioUnmarshalJSONNullResets verifies that a null radio decoded over a
+// populated one resets it, rather than transforming the values already there.
+func TestRadioUnmarshalJSONNullResets(t *testing.T) {
+	t.Parallel()
+
+	var r Radio
+	if err := json.Unmarshal([]byte(`{"MaxBitRate": 300, "TransmitPower": 75}`), &r); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if err := json.Unmarshal([]byte(`null`), &r); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if want := (Radio{}); !reflect.DeepEqual(r, want) {
+		t.Errorf("Radio = %+v, want the zero value", r)
+	}
+}
+
+// TestRadioUnmarshalJSONOmittedField verifies that decoding over a populated
+// radio doesn't transform an already transformed value. MaxBitRate used to be
+// read back through the embedded alias, so a payload without it re-scaled the
+// previous result by another 1024 * 1024.
+func TestRadioUnmarshalJSONOmittedField(t *testing.T) {
+	t.Parallel()
+
+	var r Radio
+	if err := json.Unmarshal([]byte(`{"MaxBitRate": 300, "TransmitPower": 75}`), &r); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if err := json.Unmarshal([]byte(`{"TransmitPower": 50}`), &r); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if r.MaxBitRate != 0 {
+		t.Errorf("MaxBitRate = %d, want 0", r.MaxBitRate)
+	}
+
+	if want := 0.5; r.TransmitPower != want {
+		t.Errorf("TransmitPower = %v, want %v", r.TransmitPower, want)
+	}
+}
+
 func TestParseTimestamp(t *testing.T) {
 	t.Parallel()
 

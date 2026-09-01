@@ -2850,9 +2850,21 @@ type Radio struct {
 func (r *Radio) UnmarshalJSON(data []byte) error {
 	type alias Radio
 
+	// a null radio resets to the zero value, rather than transforming whatever
+	// the receiver already held
+	if string(data) == "null" {
+		*r = Radio{}
+
+		return nil
+	}
+
+	// the transformed fields are read from their own copies, never through the
+	// alias, so that a payload omitting one leaves it unset instead of
+	// transforming an already transformed value
 	aux := struct {
 		*alias
 		CurrentOperatingChannelBandwidth string `json:"CurrentOperatingChannelBandwidth"`
+		MaxBitRate                       int64  `json:"MaxBitRate"`
 		TransmitPower                    int    `json:"TransmitPower"`
 	}{
 		alias: (*alias)(r),
