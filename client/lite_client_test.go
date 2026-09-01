@@ -3,6 +3,7 @@ package client
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -269,6 +270,52 @@ func TestLiteClientGetResourceUsageUnknownPath(t *testing.T) {
 
 	if result.CPUUsage != 0 {
 		t.Errorf("want CPUUsage 0, got %d", result.CPUUsage)
+	}
+}
+
+// TestLiteClientGetResourceUsageAllUnknownPaths tests that an unknown XPath is
+// only ignorable when something else succeeded. With nothing left to report,
+// the error has to stand, or a single-action call would fail further down with
+// something unrelated to the actual cause.
+func TestLiteClientGetResourceUsageAllUnknownPaths(t *testing.T) {
+	t.Parallel()
+
+	const response = `{
+		"reply": {
+			"uid": 0,
+			"id": 2,
+			"error": {"code": 16777236, "description": "XMO_REQUEST_ACTION_ERR"},
+			"actions": [
+				{
+					"uid": 1,
+					"id": 0,
+					"error": {"code": 16777243, "description": "XMO_UNKNOWN_PATH_ERR"},
+					"callbacks": []
+				},
+				{
+					"uid": 2,
+					"id": 2,
+					"error": {"code": 16777243, "description": "XMO_UNKNOWN_PATH_ERR"},
+					"callbacks": []
+				}
+			]
+		}
+	}`
+
+	lc := createLiteClientToTestServer(t, response)
+
+	_, err := lc.GetResourceUsage(t.Context())
+	if err == nil {
+		t.Fatal("want error when every action is an unknown path, but got none")
+	}
+
+	if !errors.Is(err, ErrUnknownPath) {
+		t.Errorf("error %q is not an unknown path error", err)
+	}
+
+	// action ID 0 is the memory status XPath
+	if !strings.Contains(err.Error(), xpathMemoryStatus) {
+		t.Errorf("error %q does not name the failing XPath %q", err, xpathMemoryStatus)
 	}
 }
 
