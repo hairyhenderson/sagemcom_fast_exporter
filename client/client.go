@@ -260,34 +260,50 @@ func (c *client) apiRequest(ctx context.Context, actions []action) (map[string]r
 	if errors.Is(err, ErrRequestAction) {
 		errs := actionErrors(actions, reply.Actions)
 
-		if fatal := withoutUnknownPaths(errs); len(fatal) > 0 {
-			return result, fmt.Errorf("action error(s): %w", errors.Join(fatal...))
-		}
-
 		// An unknown path just means this device doesn't implement that part
-		// of the data model, so report whatever it did return instead of
-		// failing the whole request. Retrying wouldn't help either.
-		if len(errs) > 0 {
+		// of the data model, so report whatever else the reply carried rather
+		// than failing the whole request. Retrying wouldn't help either. If
+		// nothing succeeded there's nothing to report, and swallowing the
+		// error would only surface as a confusing one further down.
+		if allUnknownPaths(errs) && len(succeededActions(reply.Actions)) > 0 {
 			slog.WarnContext(ctx, "ignoring unimplemented xpath(s)", slog.Any("err", errors.Join(errs...)))
 
 			return result, nil
+		}
+
+		if len(errs) > 0 {
+			return result, fmt.Errorf("action error(s): %w", errors.Join(errs...))
 		}
 	}
 
 	return result, fmt.Errorf("unknown error: %w", err)
 }
 
-// withoutUnknownPaths returns the errors that aren't XMO_UNKNOWN_PATH_ERR.
-func withoutUnknownPaths(errs []error) []error {
-	fatal := make([]error, 0, len(errs))
-
+// allUnknownPaths reports whether every error is XMO_UNKNOWN_PATH_ERR. It is
+// false for an empty list: nothing failed, so nothing is ignorable.
+func allUnknownPaths(errs []error) bool {
 	for _, err := range errs {
 		if !errors.Is(err, ErrUnknownPath) {
-			fatal = append(fatal, err)
+			return false
 		}
 	}
 
-	return fatal
+	return len(errs) > 0
+}
+
+// succeededActions filters out the actions the router rejected. apiRequest has
+// already decided those errors aren't fatal (an unimplemented xpath, say), and
+// their callbacks carry no usable value.
+func succeededActions(actions []actionResp) []actionResp {
+	succeeded := make([]actionResp, 0, len(actions))
+
+	for _, a := range actions {
+		if a.Error == nil || errors.Is(a.Error, ErrNoError) {
+			succeeded = append(succeeded, a)
+		}
+	}
+
+	return succeeded
 }
 
 // actionErrors collects the errors reported by individual actions, naming each
