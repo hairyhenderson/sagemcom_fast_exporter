@@ -1,0 +1,29 @@
+# Example systemd unit for cmd/sagemcom_fast_watchdog.
+#
+# Install:
+#   go install github.com/hairyhenderson/sagemcom_fast_exporter/cmd/sagemcom_fast_watchdog@latest
+#   sudo cp $(go env GOPATH)/bin/sagemcom_fast_watchdog /usr/local/bin/
+#   sudo cp contrib/sagemcom_fast_watchdog.service /etc/systemd/system/
+#   put "WATCHDOG_PASSWORD=..." in /etc/sagemcom_fast_watchdog.env, mode 0600
+#   sudo systemctl enable --now sagemcom_fast_watchdog
+
+[Unit]
+Description=Sagemcom F@st WAN watchdog
+After=network-online.target
+Wants=network-online.target
+# Stop restarting (and show as failed) after 5 crashes in an hour.
+StartLimitIntervalSec=3600
+StartLimitBurst=5
+
+[Service]
+EnvironmentFile=/etc/sagemcom_fast_watchdog.env
+ExecStart=/usr/local/bin/sagemcom_fast_watchdog -host 192.168.2.1
+Restart=on-failure
+RestartSec=30
+
+# don't run as root; systemd owns the state directory across restarts
+DynamicUser=yes
+StateDirectory=sagemcom_fast_watchdog
+
+[Install]
+WantedBy=multi-user.target

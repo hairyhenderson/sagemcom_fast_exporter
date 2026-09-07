@@ -239,7 +239,7 @@ func (c *client) apiRequest(ctx context.Context, actions []action) (map[string]r
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP status %d: %s", resp.StatusCode, respBody)
+		return nil, &HTTPStatusError{StatusCode: resp.StatusCode, Body: string(respBody)}
 	}
 
 	var result map[string]responseBody
