@@ -70,3 +70,35 @@ func TestSaveStateAtomicNoTempLeft(t *testing.T) {
 		t.Error("temp file left behind after saveState")
 	}
 }
+
+func benchState() persistentState {
+	return persistentState{LastReboot: time.Now(), RebootsSinceOK: 2}
+}
+
+func BenchmarkSaveState(b *testing.B) {
+	path := filepath.Join(b.TempDir(), "state.json")
+	s := benchState()
+
+	b.ReportAllocs()
+
+	for b.Loop() {
+		if err := saveState(path, s); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkLoadState(b *testing.B) {
+	path := filepath.Join(b.TempDir(), "state.json")
+	if err := saveState(path, benchState()); err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+
+	for b.Loop() {
+		if _, err := loadState(path); err != nil {
+			b.Fatal(err)
+		}
+	}
+}

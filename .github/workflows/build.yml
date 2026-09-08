@@ -12,10 +12,11 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/hairyhenderson/gomplate-ci-build:latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
       - run: make test
   lint:
     name: lint

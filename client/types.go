@@ -1,7 +1,8 @@
 package client
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -87,10 +88,10 @@ type actionResp struct {
 }
 
 type callbackResp struct {
-	Result     *result                    `json:"result"`
-	Parameters map[string]json.RawMessage `json:"parameters"`
-	XPath      string                     `json:"xpath"`
-	UID        int                        `json:"uid"`
+	Result     *result                   `json:"result"`
+	Parameters map[string]jsontext.Value `json:"parameters"`
+	XPath      string                    `json:"xpath"`
+	UID        int                       `json:"uid"`
 }
 
 // error types
@@ -120,8 +121,8 @@ func (e *HTTPStatusError) Error() string {
 }
 
 type xmoError struct {
-	Description string
-	Code        int
+	Description string `json:"description"`
+	Code        int    `json:"code"`
 }
 
 func (e *xmoError) Error() string {
@@ -2830,47 +2831,47 @@ type Radio struct {
 	FragmentationThreshold           int     `json:"FragmentationThreshold,omitempty"`
 	Mcs                              int     `json:"MCS,omitempty"`
 	MaxBitRate                       int64   `json:"MaxBitRate,omitempty"`
-	TransmitPower                    float64
-	AutoChannelMaxAcs                int `json:"AutoChannelMaxAcs,omitempty"`
-	AutoChannelRefreshPeriod         int `json:"AutoChannelRefreshPeriod,omitempty"`
-	BeaconPeriod                     int `json:"BeaconPeriod,omitempty"`
-	BoardSpecificChipIndex           int `json:"BoardSpecificChipIndex,omitempty"`
-	DTIMPeriod                       int `json:"DTIMPeriod,omitempty"`
-	RetryLimit                       int `json:"RetryLimit,omitempty"`
-	CSACount                         int `json:"CSACount,omitempty"`
-	CurrentOperatingChannelBandwidth int64
-	RadarDetections                  int  `json:"RadarDetections,omitempty"`
-	Ampdu                            int  `json:"AMPDU,omitempty"`
-	NewChannelsEnable                bool `json:"NewChannelsEnable,omitempty"`
-	ChannelHoppingStatus             bool `json:"ChannelHoppingStatus,omitempty"`
-	Enable11Ac2G                     bool `json:"Enable11ac2G,omitempty"`
-	CSAEnable                        bool `json:"CSAEnable,omitempty"`
-	PacketAggregationEnable          bool `json:"PacketAggregationEnable,omitempty"`
-	ResetStats                       bool `json:"ResetStats,omitempty"`
-	DLMUMIMOEnabled                  bool `json:"DLMUMIMOEnabled,omitempty"`
-	BurstModeEnable                  bool `json:"BurstModeEnable,omitempty"`
-	SingleTxCCK                      bool `json:"SingleTxCCK,omitempty"`
-	Diversity11B                     bool `json:"Diversity11b,omitempty"`
-	DownlinkOFDMAEnable              bool `json:"DownlinkOFDMAEnable,omitempty"`
-	AutoChannelTrigger               bool `json:"AutoChannelTrigger,omitempty"`
-	AutoChannelSupported             bool `json:"AutoChannelSupported,omitempty"`
-	Enable                           bool `json:"Enable,omitempty"`
-	GModeProtectionEnabled           bool `json:"gModeProtectionEnabled,omitempty"`
-	HybridScanMode                   bool `json:"HybridScanMode,omitempty"`
-	FrameBurstEnabled                bool `json:"FrameBurstEnabled,omitempty"`
-	GreenAPEnabled                   bool `json:"GreenAPEnabled,omitempty"`
-	AutoChannelEnable                bool `json:"AutoChannelEnable,omitempty"`
-	IncreasedPowerEnable             bool `json:"IncreasedPowerEnable,omitempty"`
-	AdminStatus                      bool `json:"AdminStatus,omitempty"`
-	ATFEnable                        bool `json:"ATFEnable,omitempty"`
-	HostBasedScbEnable               bool `json:"HostBasedScbEnable,omitempty"`
-	IEEE80211HSupported              bool `json:"IEEE80211hSupported,omitempty"`
-	TransmitBeamForming              bool `json:"TransmitBeamForming,omitempty"`
-	UplinkOFDMAEnable                bool `json:"UplinkOFDMAEnable,omitempty"`
-	Upstream                         bool `json:"Upstream,omitempty"`
-	VoWEnable                        bool `json:"VoWEnable,omitempty"`
-	IEEE80211HEnabled                bool `json:"IEEE80211hEnabled,omitempty"`
-	ChannelHoppingEnable             bool `json:"ChannelHoppingEnable,omitempty"`
+	TransmitPower                    float64 `json:"-"` // computed in UnmarshalJSON
+	AutoChannelMaxAcs                int     `json:"AutoChannelMaxAcs,omitempty"`
+	AutoChannelRefreshPeriod         int     `json:"AutoChannelRefreshPeriod,omitempty"`
+	BeaconPeriod                     int     `json:"BeaconPeriod,omitempty"`
+	BoardSpecificChipIndex           int     `json:"BoardSpecificChipIndex,omitempty"`
+	DTIMPeriod                       int     `json:"DTIMPeriod,omitempty"`
+	RetryLimit                       int     `json:"RetryLimit,omitempty"`
+	CSACount                         int     `json:"CSACount,omitempty"`
+	CurrentOperatingChannelBandwidth int64   `json:"-"` // computed in UnmarshalJSON
+	RadarDetections                  int     `json:"RadarDetections,omitempty"`
+	Ampdu                            int     `json:"AMPDU,omitempty"`
+	NewChannelsEnable                bool    `json:"NewChannelsEnable,omitempty"`
+	ChannelHoppingStatus             bool    `json:"ChannelHoppingStatus,omitempty"`
+	Enable11Ac2G                     bool    `json:"Enable11ac2G,omitempty"`
+	CSAEnable                        bool    `json:"CSAEnable,omitempty"`
+	PacketAggregationEnable          bool    `json:"PacketAggregationEnable,omitempty"`
+	ResetStats                       bool    `json:"ResetStats,omitempty"`
+	DLMUMIMOEnabled                  bool    `json:"DLMUMIMOEnabled,omitempty"`
+	BurstModeEnable                  bool    `json:"BurstModeEnable,omitempty"`
+	SingleTxCCK                      bool    `json:"SingleTxCCK,omitempty"`
+	Diversity11B                     bool    `json:"Diversity11b,omitempty"`
+	DownlinkOFDMAEnable              bool    `json:"DownlinkOFDMAEnable,omitempty"`
+	AutoChannelTrigger               bool    `json:"AutoChannelTrigger,omitempty"`
+	AutoChannelSupported             bool    `json:"AutoChannelSupported,omitempty"`
+	Enable                           bool    `json:"Enable,omitempty"`
+	GModeProtectionEnabled           bool    `json:"gModeProtectionEnabled,omitempty"`
+	HybridScanMode                   bool    `json:"HybridScanMode,omitempty"`
+	FrameBurstEnabled                bool    `json:"FrameBurstEnabled,omitempty"`
+	GreenAPEnabled                   bool    `json:"GreenAPEnabled,omitempty"`
+	AutoChannelEnable                bool    `json:"AutoChannelEnable,omitempty"`
+	IncreasedPowerEnable             bool    `json:"IncreasedPowerEnable,omitempty"`
+	AdminStatus                      bool    `json:"AdminStatus,omitempty"`
+	ATFEnable                        bool    `json:"ATFEnable,omitempty"`
+	HostBasedScbEnable               bool    `json:"HostBasedScbEnable,omitempty"`
+	IEEE80211HSupported              bool    `json:"IEEE80211hSupported,omitempty"`
+	TransmitBeamForming              bool    `json:"TransmitBeamForming,omitempty"`
+	UplinkOFDMAEnable                bool    `json:"UplinkOFDMAEnable,omitempty"`
+	Upstream                         bool    `json:"Upstream,omitempty"`
+	VoWEnable                        bool    `json:"VoWEnable,omitempty"`
+	IEEE80211HEnabled                bool    `json:"IEEE80211hEnabled,omitempty"`
+	ChannelHoppingEnable             bool    `json:"ChannelHoppingEnable,omitempty"`
 }
 
 func (r *Radio) UnmarshalJSON(data []byte) error {
@@ -3116,8 +3117,8 @@ type Host struct {
 			UID         int    `json:"uid,omitempty"`
 		} `json:"Options,omitempty"`
 	} `json:"History,omitempty"`
-	IPv6Addresses []json.RawMessage `json:"IPv6Addresses,omitempty"`
-	Options       []json.RawMessage `json:"Options,omitempty"`
+	IPv6Addresses []jsontext.Value `json:"IPv6Addresses,omitempty"`
+	Options       []jsontext.Value `json:"Options,omitempty"`
 	IPv4Addresses []struct {
 		IPAddress string `json:"IPAddress,omitempty"`
 		UID       int    `json:"uid,omitempty"`
