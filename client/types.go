@@ -2876,12 +2876,28 @@ type Radio struct {
 func (r *Radio) UnmarshalJSON(data []byte) error {
 	type alias Radio
 
-	aux := &struct {
+	// a null radio resets to the zero value, rather than transforming whatever
+	// the receiver already held
+	if string(data) == "null" {
+		*r = Radio{}
+
+		return nil
+	}
+
+	// the transformed fields are read from their own copies, never through the
+	// alias, so that a payload omitting one leaves it unset instead of
+	// transforming an already transformed value
+	aux := struct {
 		*alias
 		CurrentOperatingChannelBandwidth string `json:"CurrentOperatingChannelBandwidth"`
+		MaxBitRate                       int64  `json:"MaxBitRate"`
 		TransmitPower                    int    `json:"TransmitPower"`
 	}{
 		alias: (*alias)(r),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
 	}
 
 	if aux.CurrentOperatingChannelBandwidth != "" {
@@ -2900,10 +2916,6 @@ func (r *Radio) UnmarshalJSON(data []byte) error {
 
 	// Convert TransmitPower from a percentage out of 100 to a ratio out of 1
 	r.TransmitPower = float64(aux.TransmitPower) / 100
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -2961,12 +2973,30 @@ func parseTimestamp(s string) (time.Time, error) {
 		return time.Time{}, nil
 	}
 
-	if strings.HasPrefix(s, "0-") {
-		// special-case for year 0
-		s = "000" + s
+	// Router uses "0-..." (year 0) and "1-..." (year 1) as "never set"
+	// sentinels. Neither parses, as the layout wants a 4 digit year.
+	if strings.HasPrefix(s, "0-") || strings.HasPrefix(s, "1-") {
+		return time.Time{}, nil
 	}
 
-	return time.Parse("2006-01-02T15:04:05-0700", s)
+	t, err := time.Parse("2006-01-02T15:04:05-0700", s)
+	if err != nil {
+		// Also accept RFC 3339 (Z suffix), used by some router firmware versions.
+		t, err = time.Parse(time.RFC3339, s)
+	}
+
+	if err != nil {
+		return t, err
+	}
+
+	// A zero-padded year is the same sentinel, and parses. Normalize it, so
+	// that the offset the router happened to send can't turn "never set" into
+	// a real timestamp.
+	if t.Year() <= 1 {
+		return time.Time{}, nil
+	}
+
+	return t, nil
 }
 
 func (d *DeviceInfo) UnmarshalJSON(b []byte) error {
