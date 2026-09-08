@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -93,6 +94,31 @@ type callbackResp struct {
 }
 
 // error types
+
+// ErrRebootRejected means the device answered a reboot request with an error
+// it will not recover from on its own (a 4xx status, or an XMO error such as
+// XMO_ACCESS_RESTRICTION_ERR). It is distinct both from a transport failure -
+// the expected result of a reboot the device accepted - and from a transient
+// error worth retrying.
+var ErrRebootRejected = errors.New("device rejected the reboot request")
+
+// ErrNotLoggedIn is returned by Reboot when called before a successful Login.
+var ErrNotLoggedIn = errors.New("not logged in: call Login first")
+
+// HTTPStatusError is returned when the device answers an API request with a
+// non-200 HTTP status. It signifies that the device produced a response, as
+// opposed to a transport-level failure where it did not.
+//
+// Field order is chosen for struct alignment; Error() prints StatusCode first.
+type HTTPStatusError struct {
+	Body       string
+	StatusCode int
+}
+
+func (e *HTTPStatusError) Error() string {
+	return fmt.Sprintf("HTTP status %d: %s", e.StatusCode, e.Body)
+}
+
 type xmoError struct {
 	Description string
 	Code        int

@@ -63,6 +63,35 @@ To configure Prometheus to scrape from this exporter, use a [scrape_config](http
         - 'localhost:9780'
 ```
 
+## Watchdog
+
+`cmd/sagemcom_fast_watchdog` reboots a Sagemcom F@st device when the internet is
+unreachable but the device's own management API still responds - the failure
+mode where the WAN has dropped and won't come back without a power cycle.
+
+It opens a TCP connection to each `-probe-targets` address every 15 seconds; if
+none respond for `-reboot-after`, it logs in and reboots.
+
+To keep a bad situation from getting worse it leaves at least `-cooldown`
+between reboots, stops after a few reboots that don't restore connectivity (an
+upstream outage a reboot can't fix shouldn't become a reboot loop), and waits
+for connectivity to hold across a couple of checks before treating an outage as
+over. The reboot count and timing are persisted (`-state-file`), so restarting
+the watchdog - or the whole host - doesn't lose them.
+
+It's deliberately separate from the exporter: it needs write access to the
+device and a long-running process, and most people want neither.
+
+```console
+$ go install github.com/hairyhenderson/sagemcom_fast_exporter/cmd/sagemcom_fast_watchdog@latest
+$ WATCHDOG_PASSWORD=ABC123456789 sagemcom_fast_watchdog -host 192.168.2.1
+```
+
+Pass the password in `$WATCHDOG_PASSWORD` or `-password-file` rather than
+`-password` (which shows up in `ps`). Run `sagemcom_fast_watchdog -h` for the
+other flags; [`contrib/sagemcom_fast_watchdog.service`](./contrib/sagemcom_fast_watchdog.service)
+is an example systemd unit.
+
 ## Grafana Dashboard
 
 There's a Grafana dashboard published to [Grafana.com](https://grafana.com/grafana/dashboards/20374) and also available [in this repo](./dashboard.json) which looks like this:
