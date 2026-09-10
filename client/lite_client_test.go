@@ -2,7 +2,7 @@ package client
 
 import (
 	_ "embed"
-	"encoding/json"
+	"encoding/json/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,8 +23,8 @@ var (
 )
 
 // createLiteClientToTestServer creates a test server.
-func createLiteClientToTestServer(t *testing.T, mockData string) *LiteClient {
-	t.Helper()
+func createLiteClientToTestServer(tb testing.TB, mockData string) *LiteClient {
+	tb.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		payload := map[string]requestBody{}
@@ -33,7 +33,7 @@ func createLiteClientToTestServer(t *testing.T, mockData string) *LiteClient {
 
 		err := json.Unmarshal([]byte(r.FormValue("req")), &payload)
 		if err != nil {
-			t.Fatalf("failed to unmarshal request body: %v", err)
+			tb.Fatalf("failed to unmarshal request body: %v", err)
 		}
 
 		var data string
@@ -50,11 +50,11 @@ func createLiteClientToTestServer(t *testing.T, mockData string) *LiteClient {
 
 		_, err = w.Write([]byte(data))
 		if err != nil {
-			t.Fatalf("Failed to write body: %v", err)
+			tb.Fatalf("Failed to write body: %v", err)
 		}
 	}))
 
-	t.Cleanup(server.Close)
+	tb.Cleanup(server.Close)
 	addr := server.URL[7:] // strip protocol
 
 	return NewLite(addr, "admin", "", EncryptionMethodSHA512, server.Client(), time.Minute)

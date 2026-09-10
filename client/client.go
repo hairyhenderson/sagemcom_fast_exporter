@@ -6,7 +6,7 @@ import (
 	"crypto/md5" //nolint:gosec // MD5 is used for compatibility with the device API
 	"crypto/sha512"
 	"encoding/hex"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
