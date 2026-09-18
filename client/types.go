@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json/jsontext"
 	"encoding/json/v2"
 	"errors"
@@ -2879,7 +2880,7 @@ func (r *Radio) UnmarshalJSON(data []byte) error {
 
 	// a null radio resets to the zero value, rather than transforming whatever
 	// the receiver already held
-	if string(data) == "null" {
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
 		*r = Radio{}
 
 		return nil

@@ -76,6 +76,26 @@ func TestRadioUnmarshalJSONNullResets(t *testing.T) {
 	}
 }
 
+// TestRadioUnmarshalJSONNullWhitespace verifies that a null surrounded by
+// whitespace resets the radio too. The decoder never passes whitespace, but a
+// direct call can.
+func TestRadioUnmarshalJSONNullWhitespace(t *testing.T) {
+	t.Parallel()
+
+	var r Radio
+	if err := json.Unmarshal([]byte(`{"MaxBitRate": 300, "Status": "Up"}`), &r); err != nil {
+		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if err := r.UnmarshalJSON([]byte(" null\n")); err != nil {
+		t.Fatalf("UnmarshalJSON returned error: %v", err)
+	}
+
+	if want := (Radio{}); !reflect.DeepEqual(r, want) {
+		t.Errorf("Radio = %+v, want the zero value", r)
+	}
+}
+
 // TestRadioUnmarshalJSONOmittedField verifies that decoding over a populated
 // radio doesn't transform an already transformed value. MaxBitRate used to be
 // read back through the embedded alias, so a payload without it re-scaled the
