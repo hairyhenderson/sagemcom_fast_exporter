@@ -2901,15 +2901,16 @@ func (r *Radio) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if aux.CurrentOperatingChannelBandwidth != "" {
-		if strings.HasSuffix(aux.CurrentOperatingChannelBandwidth, "MHz") {
-			bw, err := strconv.Atoi(aux.CurrentOperatingChannelBandwidth[:len(aux.CurrentOperatingChannelBandwidth)-3])
-			if err != nil {
-				return err
-			}
+	// Convert the CurrentOperatingChannelBandwidth from "<n>MHz" to Hz
+	r.CurrentOperatingChannelBandwidth = 0
 
-			r.CurrentOperatingChannelBandwidth = int64(bw) * 1_000_000
+	if mhz, ok := strings.CutSuffix(aux.CurrentOperatingChannelBandwidth, "MHz"); ok {
+		bw, err := strconv.Atoi(mhz)
+		if err != nil {
+			return err
 		}
+
+		r.CurrentOperatingChannelBandwidth = int64(bw) * 1_000_000
 	}
 
 	// Convert the MaxBitRate from Mbps to bps

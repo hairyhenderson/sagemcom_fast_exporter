@@ -83,13 +83,19 @@ func TestRadioUnmarshalJSONNullResets(t *testing.T) {
 func TestRadioUnmarshalJSONOmittedField(t *testing.T) {
 	t.Parallel()
 
+	const populated = `{"CurrentOperatingChannelBandwidth": "40MHz", "MaxBitRate": 300, "TransmitPower": 75}`
+
 	var r Radio
-	if err := json.Unmarshal([]byte(`{"MaxBitRate": 300, "TransmitPower": 75}`), &r); err != nil {
+	if err := json.Unmarshal([]byte(populated), &r); err != nil {
 		t.Fatalf("Unmarshal returned error: %v", err)
 	}
 
 	if err := json.Unmarshal([]byte(`{"TransmitPower": 50}`), &r); err != nil {
 		t.Fatalf("Unmarshal returned error: %v", err)
+	}
+
+	if r.CurrentOperatingChannelBandwidth != 0 {
+		t.Errorf("CurrentOperatingChannelBandwidth = %d, want 0", r.CurrentOperatingChannelBandwidth)
 	}
 
 	if r.MaxBitRate != 0 {
