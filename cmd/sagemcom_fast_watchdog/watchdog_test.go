@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"testing/synctest"
@@ -385,6 +386,81 @@ func TestWatchdog_OnlineParallelFirstSuccessWins(t *testing.T) {
 	if w.online(t.Context()) {
 		t.Fatal("online() = true, want false (no target reachable)")
 	}
+}
+
+// A probe that loses the race to a faster target is cancelled by online(); that
+// must not be logged as an unreachable target, but a real failure still is.
+//
+//nolint:paralleltest // swaps the global slog default
+func TestWatchdog_OnlineDoesNotLogCancelledProbes(t *testing.T) {
+	var buf syncBuffer
+
+	prev := slog.Default()
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})))
+	t.Cleanup(func() { slog.SetDefault(prev) })
+
+	w, _, _ := newTestWatchdog(t)
+	w.targets = []string{"192.0.2.1:53", "192.0.2.2:53"}
+	w.dialer = raceDialer{winner: "192.0.2.2:53"}
+
+	if !w.online(t.Context()) {
+		t.Fatal("online() = false, want true")
+	}
+
+	if got := buf.String(); got != "" {
+		t.Fatalf("cancelled probe was logged: %q", got)
+	}
+
+	w.dialer = raceDialer{winner: ""}
+	if w.online(t.Context()) {
+		t.Fatal("online() = true, want false")
+	}
+
+	if got := buf.String(); !strings.Contains(got, "192.0.2.1:53") || !strings.Contains(got, "192.0.2.2:53") {
+		t.Fatalf("genuine probe failures should be logged, got %q", got)
+	}
+}
+
+// raceDialer connects to winner immediately; every other target blocks until
+// cancelled (like a dial to a dead address) unless winner is empty, in which
+// case they all fail straight away.
+type raceDialer struct{ winner string }
+
+func (d raceDialer) DialContext(ctx context.Context, _, address string) (net.Conn, error) {
+	if address == d.winner {
+		c1, c2 := net.Pipe()
+		_ = c2.Close()
+
+		return c1, nil
+	}
+
+	if d.winner == "" {
+		return nil, errors.New("nope")
+	}
+
+	<-ctx.Done()
+
+	return nil, &net.OpError{Op: "dial", Net: "tcp", Err: ctx.Err()}
+}
+
+type syncBuffer struct {
+	buf strings.Builder
+	mu  sync.Mutex
+}
+
+func (b *syncBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	return b.buf.Write(p)
+}
+
+func (b *syncBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	return b.buf.String()
 }
 
 type firstTargetDialer struct{ ok string }
