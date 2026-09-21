@@ -15,6 +15,12 @@ import (
 //nolint:gochecknoglobals
 var tracer = otel.Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/collector")
 
+// label names used by several metrics
+const (
+	labelName  = "name"
+	labelAlias = "alias"
+)
+
 type collector struct {
 	ctx     context.Context
 	scraper client.Scraper
@@ -168,7 +174,7 @@ type wifiSSIDMetrics struct {
 
 //nolint:funlen
 func initEthMetrics(ns string) ethMetrics {
-	ifaceLabels := []string{"name", "alias"}
+	ifaceLabels := []string{labelName, labelAlias}
 
 	subsys := "ethernet"
 
@@ -221,7 +227,7 @@ func initEthMetrics(ns string) ethMetrics {
 				buildName("info"),
 				"A metric with a constant '1' value labeled by various diagnostic interface information",
 				[]string{
-					"name", "alias", "cable_status",
+					labelName, labelAlias, "cable_status",
 					"current_duplex_mode", "mac_address", "role", "status",
 				},
 				nil,
@@ -233,7 +239,7 @@ func initEthMetrics(ns string) ethMetrics {
 
 //nolint:funlen
 func initOpticalMetrics(ns string) opticalMetrics {
-	ifaceLabels := []string{"name", "alias"}
+	ifaceLabels := []string{labelName, labelAlias}
 
 	subsys := "optical"
 
@@ -298,7 +304,7 @@ func initOpticalMetrics(ns string) opticalMetrics {
 				buildName("info"),
 				"A metric with a constant '1' value labeled by various diagnostic interface information",
 				[]string{
-					"name", "alias", "alarm",
+					labelName, labelAlias, "alarm",
 					"part_number", "vendor_name", "status",
 				},
 				nil,
@@ -311,7 +317,7 @@ func initOpticalMetrics(ns string) opticalMetrics {
 //nolint:funlen
 func initResourcesMetrics(ns string) resourcesMetrics {
 	procLabels := make([]string, 0, 4)
-	procLabels = append(procLabels, "name", "pid")
+	procLabels = append(procLabels, labelName, "pid")
 
 	subsys := "resources"
 
@@ -414,7 +420,7 @@ func initSysMetrics(ns string) sysMetrics {
 
 func initWiFiRadioMetrics(ns string) wifiRadioMetrics {
 	radioLabels := make([]string, 0, 5)
-	radioLabels = append(radioLabels, "name", "alias")
+	radioLabels = append(radioLabels, labelName, labelAlias)
 
 	subsys := "wifi_radio"
 
@@ -457,7 +463,7 @@ func initWiFiRadioMetrics(ns string) wifiRadioMetrics {
 
 func initWiFiSSIDMetrics(ns string) wifiSSIDMetrics {
 	ssidLabels := make([]string, 0, 6)
-	ssidLabels = append(ssidLabels, "name", "alias", "ssid", "radio")
+	ssidLabels = append(ssidLabels, labelName, labelAlias, "ssid", "radio")
 
 	subsys := "wifi_ssid"
 
