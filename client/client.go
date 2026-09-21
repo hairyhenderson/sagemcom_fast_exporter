@@ -26,6 +26,9 @@ import (
 //nolint:gochecknoglobals
 var tracer = otel.Tracer("github.com/hairyhenderson/sagemcom_fast_exporter/client")
 
+// methodGetValue is the json-req method for reading values from the device
+const methodGetValue = "getValue"
+
 // Scraper is an interface for scraping data from a Sagemcom F@st device
 type Scraper interface {
 	// GetDevice retrieves device information from the device.
@@ -496,7 +499,7 @@ func (c *client) GetValue(ctx context.Context, xpath string) (*DeviceResponse, e
 	actions := []action{
 		{
 			ID:     0,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  url.PathEscape(xpath),
 		},
 	}
@@ -582,7 +585,7 @@ func (c *client) GetValues(ctx context.Context, xpaths map[string]string) (map[s
 	for _, xpath := range xpaths {
 		actions = append(actions, action{
 			ID:     len(actions),
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  url.PathEscape(xpath),
 		})
 

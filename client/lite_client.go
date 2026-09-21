@@ -48,22 +48,22 @@ func (c *LiteClient) GetDevice(ctx context.Context) (*DeviceResponse, error) {
 	actions := []action{
 		{
 			ID:     0,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathDeviceInfo,
 		},
 		{
 			ID:     1,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathWiFi,
 		},
 		{
 			ID:     2,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathEthernet,
 		},
 		{
 			ID:     3,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathOptical,
 		},
 	}
@@ -140,22 +140,22 @@ func (c *LiteClient) GetResourceUsage(ctx context.Context) (*ResourceUsage, erro
 	actions := []action{
 		{
 			ID:     0,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathMemoryStatus,
 		},
 		{
 			ID:     1,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathFlashMemoryStatus,
 		},
 		{
 			ID:     2,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathLoadAverage,
 		},
 		{
 			ID:     3,
-			Method: "getValue",
+			Method: methodGetValue,
 			XPath:  xpathCPUUsage,
 		},
 	}
