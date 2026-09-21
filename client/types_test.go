@@ -131,9 +131,9 @@ func TestParseTimestamp(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
+		want    time.Time
 		name    string
 		in      string
-		want    time.Time
 		wantErr bool
 	}{
 		{
@@ -171,6 +171,8 @@ func TestParseTimestamp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := parseTimestamp(tt.in)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("parseTimestamp(%q) error = %v, wantErr %v", tt.in, err, tt.wantErr)
