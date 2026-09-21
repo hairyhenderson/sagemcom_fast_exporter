@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -136,7 +137,7 @@ func TestParseFlagsRequiresPassword(t *testing.T) {
 	t.Setenv(passwordEnvVar, "")
 
 	fs := flag.NewFlagSet("test", flag.ContinueOnError)
-	fs.SetOutput(os.NewFile(0, os.DevNull))
+	fs.SetOutput(io.Discard)
 
 	if err := parseFlags(fs, &config{}, []string{"-host", "10.0.0.1"}); err == nil {
 		t.Fatal("expected parseFlags to fail without a password")
