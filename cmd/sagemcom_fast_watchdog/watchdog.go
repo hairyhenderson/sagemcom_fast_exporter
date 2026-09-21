@@ -165,8 +165,12 @@ func (w *watchdog) online(ctx context.Context) bool {
 func (w *watchdog) probe(ctx context.Context, target string) bool {
 	conn, err := w.dialer.DialContext(ctx, "tcp", target)
 	if err != nil {
-		slog.DebugContext(ctx, "probe target unreachable",
-			slog.String("target", target), slog.Any("err", err))
+		// online() cancels the remaining dials once one target connects; that
+		// isn't a failure worth reporting.
+		if !errors.Is(err, context.Canceled) {
+			slog.DebugContext(ctx, "probe target unreachable",
+				slog.String("target", target), slog.Any("err", err))
+		}
 
 		return false
 	}
