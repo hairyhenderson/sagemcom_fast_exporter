@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:1.6.0-labs
-FROM --platform=linux/amd64 golang:1.27-alpine AS build
+# syntax=docker/dockerfile:1.6.0-labs@sha256:bd24901c537a316a4802d920bf86605f4db8ef676ef7258a3b381e12d90c62c8
+FROM --platform=linux/amd64 golang:1.27-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d AS build
 
 ARG PKG_NAME
 ARG TARGETOS
@@ -40,7 +40,7 @@ COPY --from=build /bin/${PKG_NAME}_${TARGETOS}-${TARGETARCH}${TARGETVARIANT} /${
 
 ENTRYPOINT [ "/sagemcom_fast_exporter" ]
 
-FROM alpine:3.24 AS alpine
+FROM alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 AS alpine
 
 ARG PKG_NAME
 ARG VCS_REF
@@ -56,7 +56,7 @@ COPY --from=build /bin/${PKG_NAME}_${TARGETOS}-${TARGETARCH}${TARGETVARIANT} /${
 
 ENTRYPOINT [ "/sagemcom_fast_exporter" ]
 
-FROM --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:2009-KB4579311 AS release-windows
+FROM --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:2009-KB4579311@sha256:b9d2bb3399baac0ce0881ac82f03e759dadcf4edf751ebd9682b1435f6b9b71d AS release-windows
 
 ARG PKG_NAME
 ARG TARGETOS
