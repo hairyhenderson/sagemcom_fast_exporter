@@ -1449,7 +1449,7 @@
           "refId": "B"
         }
       ],
-      "title": "Ethernet Bandwidth (bits/sec",
+      "title": "Ethernet Bandwidth (bits/sec)",
       "transformations": [],
       "type": "timeseries"
     },
