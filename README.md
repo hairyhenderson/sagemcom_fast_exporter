@@ -11,7 +11,7 @@ Much of this was ported from https://github.com/iMicknl/python-sagemcom-api, so 
 
 | Model Number | Firmwares known to work | Notes                              |
 |--------------|-------------------------|------------------------------------|
-| 5690         | 1.19.6, 2.13            | Marketed by Bell Canada as GigaHub |
+| 5690         | 1.19.6, 2.13, 2.14.1    | Marketed by Bell Canada as GigaHub |
 
 If you have a model not listed here but able to run the exporter, please file an issue or issue a PR to update this list!
 
