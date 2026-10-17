@@ -580,15 +580,16 @@ func (c *collector) update(ctx context.Context, ch chan<- prometheus.Metric) err
 
 	slog.DebugContext(ctx, "getting resource usage")
 
+	// not every device supports the resource usage paths (see #143), so a
+	// failure here shouldn't prevent the rest of the metrics from being
+	// exported.
 	r, err := c.scraper.GetResourceUsage(ctx)
 	if err != nil {
-		slog.ErrorContext(ctx, "update getResourceUsage errored", "err", err)
-
-		return fmt.Errorf("getResourceUsage: %w", err)
+		slog.WarnContext(ctx, "update getResourceUsage errored, skipping resource metrics", "err", err)
+	} else {
+		slog.DebugContext(ctx, "got resources, updating metrics")
+		c.updateResources(ch, r)
 	}
-
-	slog.DebugContext(ctx, "got resources, updating metrics")
-	c.updateResources(ch, r)
 
 	d := v.Device
 
