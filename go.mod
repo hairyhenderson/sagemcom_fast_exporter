@@ -1,6 +1,6 @@
 module github.com/hairyhenderson/sagemcom_fast_exporter
 
-go 1.27.0
+go 1.27.2
 
 require (
 	github.com/prometheus/client_golang v1.25.0
