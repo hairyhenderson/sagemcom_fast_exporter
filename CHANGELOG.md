@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.0...v0.5.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* **collector:** don't fail the scrape when resource usage is unavailable ([#246](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/246)) ([22569c6](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/22569c69600f688e9848244ef6ec173ed4a69e3c)), closes [#143](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/143)
+* **dashboard:** add missing closing paren to Ethernet Bandwidth title ([#247](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/247)) ([5f47695](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/5f47695daf568ba8a61a899e69c32ef317eb8309)), closes [#206](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/206)
+
+
+### Documentation
+
+* add firmware 2.14.1 to the compatibility table ([#248](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/248)) ([4c951fb](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/4c951fb9a50c6d4a91ae56613d8aa56f4e9629d6))
+
+
+### Dependencies
+
+* **go:** bump github.com/prometheus/client_golang from 1.24.1 to 1.25.0 ([#234](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/234)) ([5f25625](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/5f256251d823b14d8126029c85aeacebe3b39fd5))
+* **go:** bump go directive to 1.27.2 ([#245](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/245)) ([bc6561e](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/bc6561ef07bdd7266f5163e005c8959ac5a239fb))
+* **go:** bump the otel group across 1 directory with 6 updates ([#233](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/233)) ([02d8bcc](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/02d8bcc07bba8bec7133ff44d4a76dee4af13a9d))
+
 ## [0.5.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.4.0...v0.5.0) (2026-09-21)
 
 
