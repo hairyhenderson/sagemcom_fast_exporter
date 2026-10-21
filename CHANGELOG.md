@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.1...v0.5.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **gomod:** update module github.com/prometheus/common to v0.72.1 ([#249](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/249)) ([31b42f0](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/31b42f0eb083459d715076c0015c9511db185e12))
+
+
+### Dependencies
+
+* update Go to 1.27.3 ([#252](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/252)) ([cce0136](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/cce0136a01c778b92287f98a70303935d0aa26bd))
+
 ## [0.5.1](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.0...v0.5.1) (2026-10-17)
 
 
