@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
+	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
 )
 
 const (
@@ -60,7 +61,8 @@ type config struct {
 	RebootAfter time.Duration
 	Cooldown    time.Duration
 
-	DryRun bool
+	DryRun  bool
+	Version bool
 }
 
 func main() {
@@ -69,6 +71,12 @@ func main() {
 	if err := parseFlags(flag.CommandLine, cfg, os.Args[1:]); err != nil {
 		slog.Error("invalid configuration", "err", err)
 		os.Exit(1)
+	}
+
+	if cfg.Version {
+		fmt.Printf("sagemcom_fast_watchdog %s (%s)\n", version.Version, version.GitCommit)
+
+		return
 	}
 
 	slog.SetDefault(setupLogger(cfg.LogLevel))
@@ -99,9 +107,15 @@ func parseFlags(fs *flag.FlagSet, cfg *config, args []string) error {
 		"Minimum time between reboots")
 	fs.BoolVar(&cfg.DryRun, "dry-run", false,
 		"Log what would happen but never actually reboot the device")
+	fs.BoolVar(&cfg.Version, "version", false, "Print version information and exit")
 
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("parse flags: %w", err)
+	}
+
+	// -version needs no password or other valid configuration
+	if cfg.Version {
+		return nil
 	}
 
 	if err := resolvePassword(cfg); err != nil {
