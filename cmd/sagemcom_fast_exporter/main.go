@@ -17,9 +17,9 @@ import (
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/hairyhenderson/sagemcom_fast_exporter/collector"
+	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -347,7 +347,7 @@ func traceResource(ctx context.Context, serviceName string) (*resource.Resource,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
 			semconv.ServiceVersionKey.String(version.Version),
-			attribute.String("service.revision", version.Revision),
+			attribute.String("service.revision", version.GitCommit),
 			attribute.String("module.path", module),
 		),
 	)
