@@ -17,9 +17,9 @@ import (
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/hairyhenderson/sagemcom_fast_exporter/collector"
+	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/version"
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -45,6 +45,7 @@ type config struct {
 	LogLevel   string
 	Scraper    string
 	Refresh    time.Duration
+	Version    bool
 }
 
 func main() {
@@ -52,6 +53,12 @@ func main() {
 	if err := parseFlags(flag.CommandLine, cfg); err != nil {
 		slog.Error("parseFlags", "err", err)
 		os.Exit(1)
+	}
+
+	if cfg.Version {
+		fmt.Printf("sagemcom_fast_exporter %s (%s)\n", version.Version, version.GitCommit)
+
+		return
 	}
 
 	ctx := context.Background()
@@ -75,6 +82,8 @@ func parseFlags(fs *flag.FlagSet, cfg *config) error {
 	fs.DurationVar(&cfg.Refresh, "refresh", 1*time.Hour, "Session refresh interval")
 
 	fs.StringVar(&cfg.Scraper, "scraper", "standard", "scraper to use (standard or lite)")
+
+	fs.BoolVar(&cfg.Version, "version", false, "Print version information and exit")
 
 	err := fs.Parse(os.Args[1:])
 	if err != nil {
@@ -347,7 +356,7 @@ func traceResource(ctx context.Context, serviceName string) (*resource.Resource,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
 			semconv.ServiceVersionKey.String(version.Version),
-			attribute.String("service.revision", version.Revision),
+			attribute.String("service.revision", version.GitCommit),
 			attribute.String("module.path", module),
 		),
 	)
