@@ -1,0 +1,40 @@
+name: Release binaries
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and upload binaries for (e.g. v1.2.3)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: |
+          for cmd in sagemcom_fast_exporter sagemcom_fast_watchdog; do
+            make PKG_NAME="$cmd" VERSION="${TAG#v}" COMMIT="$(git rev-parse --short HEAD)" \
+              "bin/${cmd}_linux-amd64" \
+              "bin/${cmd}_linux-arm64" \
+              "bin/${cmd}_darwin-arm64"
+          done
+          cd bin && sha256sum sagemcom_fast_*_* > sagemcom_fast_exporter_checksums.txt
+      - name: Upload to release
+        run: gh release upload "$TAG" bin/sagemcom_fast_*_* --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
