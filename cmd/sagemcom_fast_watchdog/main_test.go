@@ -144,6 +144,22 @@ func TestParseFlagsRequiresPassword(t *testing.T) {
 	}
 }
 
+func TestParseFlagsVersionSkipsValidation(t *testing.T) {
+	t.Setenv(passwordEnvVar, "")
+
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+
+	cfg := &config{}
+	if err := parseFlags(fs, cfg, []string{"-version"}); err != nil {
+		t.Fatalf("parseFlags: %v", err)
+	}
+
+	if !cfg.Version {
+		t.Error("expected cfg.Version to be set")
+	}
+}
+
 func TestResolveStatePath(t *testing.T) {
 	t.Run("explicit flag wins", func(t *testing.T) {
 		t.Setenv(systemdStateDirEnv, "/run/whatever")
