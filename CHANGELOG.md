@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.2...v0.6.0) (2026-10-30)
+
+
+### Features
+
+* add --version flag, and report the build's version in traces ([#263](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/263)) ([910af65](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/910af65e712bf018c78832a48292edb69149ddfc))
+* **watchdog:** add --version flag ([#265](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/265)) ([2d0fc81](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/2d0fc81f1db714bb5dde104aa544521bc806b106))
+
 ## [0.5.2](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.1...v0.5.2) (2026-10-21)
 
 
