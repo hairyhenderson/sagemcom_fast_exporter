@@ -47,14 +47,14 @@ jobs:
           docker buildx imagetools create --dry-run -t localhost:5000/${{ github.repository }}:dev-alpine localhost:5000/${{ github.repository }}:alpine
       if: github.repository != 'hairyhenderson/sagemcom_fast_exporter' || (github.ref != 'refs/heads/main' && ! startsWith(github.ref, 'refs/tags/'))
     - name: Login to GHCR
-      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
       with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       if: github.repository == 'hairyhenderson/sagemcom_fast_exporter' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     - name: Login to DockerHub
-      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
       with:
         username: hairyhenderson
         password: ${{ secrets.DOCKERHUB_TOKEN }}
