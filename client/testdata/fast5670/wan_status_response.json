@@ -1,0 +1,59 @@
+{
+  "reply": {
+    "uid": 0,
+    "id": 1,
+    "error": {
+      "code": 16777216,
+      "description": "XMO_REQUEST_NO_ERR"
+    },
+    "actions": [
+      {
+        "uid": 1,
+        "id": 0,
+        "error": {
+          "code": 16777238,
+          "description": "XMO_NO_ERR"
+        },
+        "callbacks": [
+          {
+            "uid": 1,
+            "result": {
+              "code": 16777238,
+              "description": "XMO_NO_ERR"
+            },
+            "xpath": "Device/PPP/Interfaces",
+            "parameters": {
+              "value": [
+                {
+                  "uid": 1,
+                  "Enable": true,
+                  "Alias": "PPP_DATA",
+                  "Name": "Device/PPP/Interfaces/Interface[PPP_DATA]",
+                  "IfcName": "ppp0",
+                  "Status": "UP",
+                  "ConnectionStatus": "CONNECTED",
+                  "LastConnectionError": "ERROR_NONE",
+                  "InternalLastConnectionError": "ERROR_NONE",
+                  "LastChange": 1623,
+                  "DefaultRoute": "DefaultRoute",
+                  "LowerLayers": "Device/Ethernet/VLANTerminations/VLANTermination[VLAN_DATA]",
+                  "Username": "user",
+                  "Password": "_XMO_WRITE_ONLY_",
+                  "IPCP": {
+                    "LocalIPAddress": "192.0.2.10",
+                    "RemoteIPAddress": "192.0.2.1",
+                    "DNSServers": "192.0.2.53"
+                  },
+                  "PPPoE": {
+                    "SessionID": 1234,
+                    "ACName": "example-ac"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

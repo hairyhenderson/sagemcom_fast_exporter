@@ -9,7 +9,7 @@ import (
 )
 
 // Controller logs in to a device and performs administrative actions such as
-// rebooting it. Unlike [Scraper] it does not maintain a long-lived scrape
+// rebooting it, or checking the state of its WAN uplink. Unlike [Scraper] it does not maintain a long-lived scrape
 // session - callers should Login, perform an action, then Logout.
 //
 // A Controller is not safe for concurrent use.
@@ -17,6 +17,7 @@ type Controller interface {
 	Login(ctx context.Context) error
 	Logout(ctx context.Context) error
 	Reboot(ctx context.Context) error
+	WANStatus(ctx context.Context) (*WANStatus, error)
 }
 
 var _ Controller = (*client)(nil)
@@ -25,9 +26,9 @@ var _ Controller = (*client)(nil)
 // a device. It accepts the same connection parameters as [New], minus the
 // scrape session refresh interval.
 func NewController(host, username, password, authMethod string, hc *http.Client) Controller {
-	// refresh interval is 0: Reboot uses apiRequest directly, not
+	// refresh interval is 0: Reboot and WANStatus use apiRequest directly, not
 	// apiRequestWithRefresh, so no session refresh happens. Do not switch
-	// Reboot to apiRequestWithRefresh without revisiting this - a 0 interval
+	// either to apiRequestWithRefresh without revisiting this - a 0 interval
 	// makes it refresh (log out + back in) on every call.
 	return newClient(host, username, password, authMethod, hc, 0)
 }

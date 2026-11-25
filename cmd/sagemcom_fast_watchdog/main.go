@@ -25,12 +25,17 @@ import (
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
 	defaultProbeTargets = "1.1.1.1:53,8.8.8.8:53"
 	defaultRebootAfter  = 5 * time.Minute
 	defaultCooldown     = 30 * time.Minute
+	defaultMetricsAddr  = "127.0.0.1:9781"
+
+	defaultWedgedRebootAfter  = 2 * time.Minute
+	defaultWANDownRebootAfter = 30 * time.Minute
 
 	throttledLogInterval = 1 * time.Minute
 	stateFileName        = "state.json"
@@ -55,11 +60,14 @@ type config struct {
 	LogLevel     string
 	ProbeTargets string
 	StateFile    string
+	MetricsAddr  string
 
 	targets []string // parsed from ProbeTargets by parseFlags
 
-	RebootAfter time.Duration
-	Cooldown    time.Duration
+	RebootAfter        time.Duration
+	WedgedRebootAfter  time.Duration
+	WANDownRebootAfter time.Duration
+	Cooldown           time.Duration
 
 	DryRun  bool
 	Version bool
@@ -102,11 +110,19 @@ func parseFlags(fs *flag.FlagSet, cfg *config, args []string) error {
 	fs.StringVar(&cfg.ProbeTargets, "probe-targets", defaultProbeTargets,
 		"Comma-separated ip:port targets to TCP-probe; connectivity is OK if any one connects")
 	fs.DurationVar(&cfg.RebootAfter, "reboot-after", defaultRebootAfter,
-		"Reboot the device after this long with no connectivity")
+		"Reboot the device after this long with no connectivity, when its WAN status is unknown "+
+			"or its WAN came back during the outage (measured from when it came back)")
+	fs.DurationVar(&cfg.WedgedRebootAfter, "wedged-reboot-after", defaultWedgedRebootAfter,
+		"Reboot the device after this long with no connectivity while it reports its WAN up "+
+			"for the whole outage (0 uses -reboot-after)")
+	fs.DurationVar(&cfg.WANDownRebootAfter, "wan-down-reboot-after", defaultWANDownRebootAfter,
+		"Reboot the device after this long with no connectivity while it reports its WAN down (0 never reboots)")
 	fs.DurationVar(&cfg.Cooldown, "cooldown", defaultCooldown,
 		"Minimum time between reboots")
 	fs.BoolVar(&cfg.DryRun, "dry-run", false,
-		"Log what would happen but never actually reboot the device")
+		"Log what would happen but never actually reboot the device (it still logs in to read the WAN status)")
+	fs.StringVar(&cfg.MetricsAddr, "addr", defaultMetricsAddr,
+		"Address to serve Prometheus metrics on, at /metrics (empty disables)")
 	fs.BoolVar(&cfg.Version, "version", false, "Print version information and exit")
 
 	if err := fs.Parse(args); err != nil {
@@ -157,6 +173,14 @@ func validateConfig(cfg *config) error {
 		return errors.New("-cooldown must not be negative")
 	}
 
+	if cfg.WedgedRebootAfter < 0 {
+		return errors.New("-wedged-reboot-after must not be negative")
+	}
+
+	if cfg.WANDownRebootAfter < 0 {
+		return errors.New("-wan-down-reboot-after must not be negative")
+	}
+
 	targets, err := parseTargets(cfg.ProbeTargets)
 	if err != nil {
 		return err
@@ -205,24 +229,34 @@ func run(ctx context.Context, cfg *config) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
+	reg := prometheus.NewRegistry()
+
 	w := &watchdog{
 		cfg:       cfg,
 		ctrl:      client.NewController(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, &http.Client{}),
 		dialer:    &net.Dialer{},
 		targets:   cfg.targets,
 		statePath: resolveStatePath(cfg),
+		m:         newMetrics(reg, cfg.targets),
 	}
 
 	w.restoreState(ctx)
 
 	slog.InfoContext(ctx, "starting watchdog",
+		slog.String("version", version.Version),
 		slog.String("host", cfg.Host),
 		slog.Any("targets", cfg.targets),
 		slog.Duration("reboot_after", cfg.RebootAfter),
+		slog.Duration("wedged_reboot_after", cfg.WedgedRebootAfter),
+		slog.Duration("wan_down_reboot_after", cfg.WANDownRebootAfter),
 		slog.Duration("cooldown", cfg.Cooldown),
 		slog.String("state_file", w.statePath),
 		slog.Bool("dry_run", cfg.DryRun),
 	)
+
+	if cfg.MetricsAddr != "" {
+		serveMetrics(ctx, cfg.MetricsAddr, reg)
+	}
 
 	return w.loop(ctx)
 }
@@ -268,6 +302,9 @@ func (w *watchdog) restoreState(ctx context.Context) {
 	w.lastReboot = st.LastReboot
 	w.rebootsSinceOK = st.RebootsSinceOK
 	w.gaveUpLogged = st.RebootsSinceOK >= maxReboots
+
+	setTimestamp(w.m.lastReboot, w.lastReboot)
+	boolGauge(w.m.gaveUp, w.gaveUpLogged)
 
 	slog.InfoContext(ctx, "restored reboot state",
 		slog.Time("last_reboot", st.LastReboot),

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestMain(m *testing.M) {
@@ -25,11 +26,43 @@ func TestMain(m *testing.M) {
 type fakeController struct {
 	loginErr    error
 	rebootErr   error
+	wan         *fakeWAN // nil: the device doesn't report WAN status
 	mu          sync.Mutex
 	rebootDelay time.Duration
 	logins      int
 	reboots     int
 	logouts     int
+	wanChecks   int
+}
+
+// fakeWAN is a device's WAN state: up since a point in (synctest) time, or down.
+type fakeWAN struct {
+	since time.Time
+	err   error
+	up    bool
+}
+
+func (f *fakeController) WANStatus(context.Context) (*client.WANStatus, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.wanChecks++
+
+	switch {
+	case f.wan == nil:
+		return nil, client.ErrNoWANInterface
+	case f.wan.err != nil:
+		return nil, f.wan.err
+	}
+
+	return &client.WANStatus{Up: f.wan.up, Since: time.Since(f.wan.since)}, nil
+}
+
+func (f *fakeController) setWAN(wan *fakeWAN) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	f.wan = wan
 }
 
 func (f *fakeController) Login(context.Context) error {
@@ -122,6 +155,7 @@ func newTestWatchdog(t *testing.T) (*watchdog, *fakeController, *fakeDialer) {
 		ctrl:    fc,
 		dialer:  fd,
 		targets: []string{"192.0.2.1:53"},
+		m:       newMetrics(prometheus.NewRegistry(), []string{"192.0.2.1:53"}),
 	}
 
 	return w, fc, fd
@@ -331,8 +365,9 @@ func TestWatchdog_DryRunNeverRebootsButRespectsBackoff(t *testing.T) {
 		time.Sleep((w.cfg.Cooldown + settleDelay) * time.Duration(maxReboots+2))
 		synctest.Wait()
 
-		if logins, reboots, _ := fc.counts(); logins != 0 || reboots != 0 {
-			t.Fatalf("dry-run touched the device: logins=%d reboots=%d", logins, reboots)
+		// it may log in to read the WAN status, but must never reboot
+		if _, reboots, _ := fc.counts(); reboots != 0 {
+			t.Fatalf("dry-run rebooted the device %d times", reboots)
 		}
 
 		if w.rebootsSinceOK != maxReboots {
