@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.6.0...v0.7.0) (2026-11-25)
+
+
+### Features
+
+* **watchdog:** decide when to reboot from the device's WAN status, and export metrics ([#283](https://github.com/hairyhenderson/sagemcom_fast_exporter/issues/283)) ([7c2f8e0](https://github.com/hairyhenderson/sagemcom_fast_exporter/commit/7c2f8e0b84def671e1d2f7d9b9c444b429bb1b7b))
+
 ## [0.6.0](https://github.com/hairyhenderson/sagemcom_fast_exporter/compare/v0.5.2...v0.6.0) (2026-11-19)
 
 
