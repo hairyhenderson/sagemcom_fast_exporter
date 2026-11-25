@@ -26,6 +26,7 @@ import (
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
 	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 )
 
 const (
@@ -236,16 +237,8 @@ func run(ctx context.Context, cfg *config) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	reg := prometheus.NewRegistry()
-
-	w := &watchdog{
-		cfg:       cfg,
-		ctrl:      client.NewController(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, &http.Client{}),
-		dialer:    &net.Dialer{},
-		targets:   cfg.targets,
-		statePath: resolveStatePath(cfg),
-		m:         newMetrics(reg, cfg.targets),
-	}
+	ctrl := client.NewController(cfg.Host, cfg.Username, cfg.Password, cfg.AuthMethod, &http.Client{})
+	w := newWatchdog(cfg, ctrl, &net.Dialer{})
 
 	w.restoreState(ctx)
 
@@ -262,6 +255,12 @@ func run(ctx context.Context, cfg *config) error {
 	)
 
 	if cfg.MetricsAddr != "" {
+		reg := prometheus.NewRegistry()
+		reg.MustRegister(w,
+			collectors.NewGoCollector(),
+			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		)
+
 		serveMetrics(ctx, cfg.MetricsAddr, reg)
 	}
 
@@ -269,6 +268,8 @@ func run(ctx context.Context, cfg *config) error {
 }
 
 func (w *watchdog) restoreState(ctx context.Context) {
+	defer w.publish()
+
 	if w.statePath == "" {
 		return
 	}
@@ -309,9 +310,6 @@ func (w *watchdog) restoreState(ctx context.Context) {
 	w.lastReboot = st.LastReboot
 	w.rebootsSinceOK = st.RebootsSinceOK
 	w.gaveUpLogged = st.RebootsSinceOK >= maxReboots
-
-	setTimestamp(w.m.lastReboot, w.lastReboot)
-	boolGauge(w.m.gaveUp, w.gaveUpLogged)
 
 	slog.InfoContext(ctx, "restored reboot state",
 		slog.Time("last_reboot", st.LastReboot),

@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestMain(m *testing.M) {
@@ -147,16 +146,11 @@ func newTestWatchdog(t *testing.T) (*watchdog, *fakeController, *fakeDialer) {
 	fc := &fakeController{}
 	fd := &fakeDialer{online: true}
 
-	w := &watchdog{
-		cfg: &config{
-			RebootAfter: 2 * time.Minute,
-			Cooldown:    20 * time.Minute,
-		},
-		ctrl:    fc,
-		dialer:  fd,
-		targets: []string{"192.0.2.1:53"},
-		m:       newMetrics(prometheus.NewRegistry(), []string{"192.0.2.1:53"}),
-	}
+	w := newWatchdog(&config{
+		RebootAfter: 2 * time.Minute,
+		Cooldown:    20 * time.Minute,
+		targets:     []string{"192.0.2.1:53"},
+	}, fc, fd)
 
 	return w, fc, fd
 }

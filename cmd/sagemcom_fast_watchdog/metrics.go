@@ -10,7 +10,6 @@ import (
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/internal/version"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -31,29 +30,29 @@ const (
 	wanCheckError = "error"
 )
 
+// metrics holds the watchdog's counters and histogram, which are updated as
+// things happen, and the descriptors for the gauges, which Collect computes
+// from the watchdog's published state.
 type metrics struct {
-	connectivityUp  prometheus.Gauge
 	probes          *prometheus.CounterVec
 	probeDuration   *prometheus.HistogramVec
-	outageStart     prometheus.Gauge
 	reboots         *prometheus.CounterVec
-	lastReboot      prometheus.Gauge
-	gaveUp          prometheus.Gauge
 	wanChecks       *prometheus.CounterVec
 	sessionFailures prometheus.Counter
+
+	connectivityUp *prometheus.Desc
+	outageStart    *prometheus.Desc
+	lastReboot     *prometheus.Desc
+	gaveUp         *prometheus.Desc
+	buildInfo      *prometheus.Desc
 }
 
-// newMetrics creates the watchdog's metrics and registers them, along with
-// build info and the standard Go and process collectors, on reg.
-//
-//nolint:funlen // one metric definition after another
-func newMetrics(reg prometheus.Registerer, targets []string) *metrics {
+func newMetrics(targets []string) *metrics {
+	desc := func(name, help string, constLabels prometheus.Labels) *prometheus.Desc {
+		return prometheus.NewDesc(prometheus.BuildFQName(metricsNamespace, "", name), help, nil, constLabels)
+	}
+
 	m := &metrics{
-		connectivityUp: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "connectivity_up",
-			Help:      "1 if the last connectivity check reached at least one probe target, 0 if not.",
-		}),
 		probes: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: metricsNamespace,
 			Name:      "probes_total",
@@ -65,26 +64,11 @@ func newMetrics(reg prometheus.Registerer, targets []string) *metrics {
 			Help:      "Time taken by connectivity probes, successful or not.",
 			Buckets:   prometheus.DefBuckets,
 		}, []string{"target"}),
-		outageStart: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "outage_start_timestamp_seconds",
-			Help:      "When the current outage began, as a Unix timestamp. 0 when connectivity is up.",
-		}),
 		reboots: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: metricsNamespace,
 			Name:      "reboots_total",
 			Help:      "Reboot attempts by the WAN state that triggered them (reason) and outcome (result).",
 		}, []string{"reason", "result"}),
-		lastReboot: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "last_reboot_timestamp_seconds",
-			Help:      "When the device was last rebooted (or a reboot was rejected) during the current outage, as a Unix timestamp. 0 if none.",
-		}),
-		gaveUp: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: metricsNamespace,
-			Name:      "gave_up",
-			Help:      "1 if the watchdog has stopped rebooting until connectivity recovers, 0 otherwise.",
-		}),
 		wanChecks: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: metricsNamespace,
 			Name:      "wan_checks_total",
@@ -95,22 +79,18 @@ func newMetrics(reg prometheus.Registerer, targets []string) *metrics {
 			Name:      "device_session_failures_total",
 			Help:      "Attempts to log in to the device (to check its WAN status or reboot it) that failed.",
 		}),
+
+		connectivityUp: desc("connectivity_up",
+			"1 if the last connectivity check reached at least one probe target, 0 if not.", nil),
+		outageStart: desc("outage_start_timestamp_seconds",
+			"When the current outage began, as a Unix timestamp. 0 when connectivity is up.", nil),
+		lastReboot: desc("last_reboot_timestamp_seconds",
+			"When the device was last rebooted (or a reboot was rejected) during the current outage, as a Unix timestamp. 0 if none.", nil),
+		gaveUp: desc("gave_up",
+			"1 if the watchdog has stopped rebooting until connectivity recovers, 0 otherwise.", nil),
+		buildInfo: desc("build_info", "Build information. Always 1.",
+			prometheus.Labels{"version": version.Version, "revision": version.GitCommit}),
 	}
-
-	buildInfo := prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace:   metricsNamespace,
-		Name:        "build_info",
-		Help:        "Build information. Always 1.",
-		ConstLabels: prometheus.Labels{"version": version.Version, "revision": version.GitCommit},
-	})
-	buildInfo.Set(1)
-
-	reg.MustRegister(
-		m.connectivityUp, m.probes, m.probeDuration, m.outageStart, m.reboots,
-		m.lastReboot, m.gaveUp, m.wanChecks, m.sessionFailures, buildInfo,
-		collectors.NewGoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-	)
 
 	// initialise the series we know about so they're present (at 0) from the
 	// first scrape, rather than appearing only once something happens
@@ -136,22 +116,85 @@ func (m *metrics) observeProbe(target string, ok bool, d time.Duration) {
 	m.probeDuration.WithLabelValues(target).Observe(d.Seconds())
 }
 
-func setTimestamp(g prometheus.Gauge, t time.Time) {
-	if t.IsZero() {
-		g.Set(0)
-
-		return
-	}
-
-	g.Set(float64(t.UnixNano()) / 1e9)
+// gaugeState is the part of the watchdog's state that Collect reports. The
+// loop owns the watchdog's fields and can block for minutes at a time (a
+// reboot's settle delay), so rather than locking those, it copies them here
+// with publish whenever they change.
+type gaugeState struct {
+	outageStart    time.Time
+	lastReboot     time.Time
+	connectivityUp bool
+	gaveUp         bool
 }
 
-func boolGauge(g prometheus.Gauge, v bool) {
-	if v {
-		g.Set(1)
-	} else {
-		g.Set(0)
+// publish makes the watchdog's current state visible to Collect.
+func (w *watchdog) publish() {
+	st := gaugeState{
+		outageStart:    w.outageStart,
+		lastReboot:     w.lastReboot,
+		connectivityUp: w.connectivityUp,
+		gaveUp:         w.gaveUpLogged,
 	}
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.published = st
+}
+
+var _ prometheus.Collector = (*watchdog)(nil)
+
+// Describe implements [prometheus.Collector].
+func (w *watchdog) Describe(ch chan<- *prometheus.Desc) {
+	for _, d := range []*prometheus.Desc{w.m.connectivityUp, w.m.outageStart, w.m.lastReboot, w.m.gaveUp, w.m.buildInfo} {
+		ch <- d
+	}
+
+	w.m.probes.Describe(ch)
+	w.m.probeDuration.Describe(ch)
+	w.m.reboots.Describe(ch)
+	w.m.wanChecks.Describe(ch)
+	w.m.sessionFailures.Describe(ch)
+}
+
+// Collect implements [prometheus.Collector].
+func (w *watchdog) Collect(ch chan<- prometheus.Metric) {
+	w.mu.Lock()
+	st := w.published
+	w.mu.Unlock()
+
+	gauge := func(d *prometheus.Desc, v float64) {
+		ch <- prometheus.MustNewConstMetric(d, prometheus.GaugeValue, v)
+	}
+
+	gauge(w.m.connectivityUp, boolFloat(st.connectivityUp))
+	gauge(w.m.outageStart, timestamp(st.outageStart))
+	gauge(w.m.lastReboot, timestamp(st.lastReboot))
+	gauge(w.m.gaveUp, boolFloat(st.gaveUp))
+	gauge(w.m.buildInfo, 1)
+
+	w.m.probes.Collect(ch)
+	w.m.probeDuration.Collect(ch)
+	w.m.reboots.Collect(ch)
+	w.m.wanChecks.Collect(ch)
+	w.m.sessionFailures.Collect(ch)
+}
+
+// timestamp is t as Unix seconds, or 0 for the zero time.
+func timestamp(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
+	}
+
+	return float64(t.UnixNano()) / 1e9
+}
+
+func boolFloat(v bool) float64 {
+	if v {
+		return 1
+	}
+
+	return 0
 }
 
 // serveMetrics serves /metrics on addr until ctx is done. A failure to listen

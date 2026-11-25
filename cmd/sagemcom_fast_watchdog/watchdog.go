@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/hairyhenderson/sagemcom_fast_exporter/client"
@@ -69,8 +70,25 @@ type watchdog struct {
 
 	consecutiveOK  int
 	rebootsSinceOK int
+	connectivityUp bool // result of the last check
 	gaveUpLogged   bool
 	wanUnsupported bool // the device doesn't report WAN status; don't ask again
+
+	mu        sync.Mutex // guards published, which Collect reads from another goroutine
+	published gaugeState
+}
+
+// newWatchdog creates a watchdog for cfg, which must already have been
+// validated (see parseFlags).
+func newWatchdog(cfg *config, ctrl controller, d dialer) *watchdog {
+	return &watchdog{
+		cfg:       cfg,
+		ctrl:      ctrl,
+		dialer:    d,
+		targets:   cfg.targets,
+		statePath: resolveStatePath(cfg),
+		m:         newMetrics(cfg.targets),
+	}
 }
 
 // loop runs connectivity checks until ctx is cancelled.
@@ -92,16 +110,15 @@ func (w *watchdog) loop(ctx context.Context) error {
 
 // tick performs one connectivity check and reacts to the result.
 func (w *watchdog) tick(ctx context.Context) {
-	ok := w.online(ctx)
-	boolGauge(w.m.connectivityUp, ok)
+	w.connectivityUp = w.online(ctx)
 
-	if ok {
+	if w.connectivityUp {
 		w.onProbeOK(ctx)
 	} else {
 		w.onFailure(ctx)
 	}
 
-	setTimestamp(w.m.outageStart, w.outageStart)
+	w.publish()
 }
 
 // onProbeOK handles a successful check, logging the end of any outage. After
@@ -142,9 +159,6 @@ func (w *watchdog) onProbeOK(ctx context.Context) {
 	w.lastReboot = time.Time{}
 	w.lastAttempt = time.Time{}
 	w.gaveUpLogged = false
-
-	setTimestamp(w.m.lastReboot, w.lastReboot)
-	w.m.gaveUp.Set(0)
 
 	w.persist(ctx)
 }
@@ -482,12 +496,14 @@ func (w *watchdog) recordReboot(ctx context.Context, now time.Time) {
 	w.lastReboot = now
 	w.rebootsSinceOK++
 
-	setTimestamp(w.m.lastReboot, now)
 	w.persist(ctx)
 
 	if w.rebootsSinceOK >= maxReboots {
 		w.logGaveUp(ctx)
 	}
+
+	// before the settle delay holds up the loop
+	w.publish()
 }
 
 func (w *watchdog) logGaveUp(ctx context.Context) {
@@ -501,7 +517,6 @@ func (w *watchdog) logGaveUp(ctx context.Context) {
 	)
 
 	w.gaveUpLogged = true
-	w.m.gaveUp.Set(1)
 }
 
 func (w *watchdog) sleep(ctx context.Context, d time.Duration) {

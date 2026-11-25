@@ -305,11 +305,11 @@ func TestWatchdog_LogsRecoveryWithoutReboot(t *testing.T) {
 		time.Sleep(w.cfg.RebootAfter / 2)
 		synctest.Wait()
 
-		if got := testutil.ToFloat64(w.m.outageStart); got == 0 {
+		if got := gathered(t, w, "outage_start_timestamp_seconds"); got == 0 {
 			t.Error("outage_start_timestamp_seconds = 0 during an outage")
 		}
 
-		if got := testutil.ToFloat64(w.m.connectivityUp); got != 0 {
+		if got := gathered(t, w, "connectivity_up"); got != 0 {
 			t.Errorf("connectivity_up = %v during an outage, want 0", got)
 		}
 
@@ -326,11 +326,11 @@ func TestWatchdog_LogsRecoveryWithoutReboot(t *testing.T) {
 			t.Fatalf("no recovery line with the outage length; log:\n%s", out)
 		}
 
-		if got := testutil.ToFloat64(w.m.outageStart); got != 0 {
+		if got := gathered(t, w, "outage_start_timestamp_seconds"); got != 0 {
 			t.Errorf("outage_start_timestamp_seconds = %v after recovery, want 0", got)
 		}
 
-		if got := testutil.ToFloat64(w.m.connectivityUp); got != 1 {
+		if got := gathered(t, w, "connectivity_up"); got != 1 {
 			t.Errorf("connectivity_up = %v after recovery, want 1", got)
 		}
 
