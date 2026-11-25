@@ -103,9 +103,11 @@ func TestResolvePassword(t *testing.T) {
 
 func baseConfig() *config {
 	return &config{
-		ProbeTargets: defaultProbeTargets,
-		RebootAfter:  defaultRebootAfter,
-		Cooldown:     defaultCooldown,
+		ProbeTargets:       defaultProbeTargets,
+		RebootAfter:        defaultRebootAfter,
+		WedgedRebootAfter:  defaultWedgedRebootAfter,
+		WANDownRebootAfter: defaultWANDownRebootAfter,
+		Cooldown:           defaultCooldown,
 	}
 }
 
@@ -116,14 +118,32 @@ func TestValidateConfig(t *testing.T) {
 		t.Fatalf("default config rejected: %v", err)
 	}
 
-	mutations := map[string]func(*config){
-		"zero reboot-after":     func(c *config) { c.RebootAfter = 0 },
-		"negative reboot-after": func(c *config) { c.RebootAfter = -time.Second },
-		"negative cooldown":     func(c *config) { c.Cooldown = -time.Second },
-		"bad target":            func(c *config) { c.ProbeTargets = "1.1.1.1" },
-		"empty targets":         func(c *config) { c.ProbeTargets = " , " },
+	valid := map[string]func(*config){
+		"wedged disabled":                  func(c *config) { c.WedgedRebootAfter = 0 },
+		"wedged equals reboot-after":       func(c *config) { c.WedgedRebootAfter = c.RebootAfter },
+		"wan-down never":                   func(c *config) { c.WANDownRebootAfter = 0 },
+		"wan-down shorter than the others": func(c *config) { c.WANDownRebootAfter = time.Minute },
 	}
-	for name, mutate := range mutations {
+	for name, mutate := range valid {
+		cfg := baseConfig()
+		mutate(cfg)
+
+		if err := validateConfig(cfg); err != nil {
+			t.Errorf("%s: validateConfig rejected a valid config: %v", name, err)
+		}
+	}
+
+	invalid := map[string]func(*config){
+		"zero reboot-after":               func(c *config) { c.RebootAfter = 0 },
+		"negative reboot-after":           func(c *config) { c.RebootAfter = -time.Second },
+		"negative cooldown":               func(c *config) { c.Cooldown = -time.Second },
+		"negative wedged-reboot-after":    func(c *config) { c.WedgedRebootAfter = -time.Second },
+		"wedged longer than reboot-after": func(c *config) { c.WedgedRebootAfter = c.RebootAfter + time.Second },
+		"negative wan-down-reboot-after":  func(c *config) { c.WANDownRebootAfter = -time.Second },
+		"bad target":                      func(c *config) { c.ProbeTargets = "1.1.1.1" },
+		"empty targets":                   func(c *config) { c.ProbeTargets = " , " },
+	}
+	for name, mutate := range invalid {
 		cfg := baseConfig()
 		mutate(cfg)
 

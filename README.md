@@ -69,8 +69,16 @@ To configure Prometheus to scrape from this exporter, use a [scrape_config](http
 unreachable but the device's own management API still responds - the failure
 mode where the WAN has dropped and won't come back without a power cycle.
 
-It opens a TCP connection to each `-probe-targets` address every 15 seconds; if
-none respond for `-reboot-after`, it logs in and reboots.
+It opens a TCP connection to each `-probe-targets` address every 15 seconds.
+When none respond, it logs in to the device about once a minute to read the
+state of its WAN (PPP) uplink, and decides how long to wait before rebooting:
+
+| The device says its WAN is... | Likely cause | Reboots after |
+|---|---|---|
+| up for the whole outage | the device is wedged, and only a reboot clears it | `-wedged-reboot-after` (2m) |
+| back up, but it dropped during the outage | a reconnect; the LAN side may need a few minutes to catch up | `-reboot-after` (5m) from when the WAN came back |
+| down | an upstream outage a reboot probably won't fix | `-wan-down-reboot-after` (30m; `0` never reboots) |
+| unknown (can't be read, or the device has no PPP uplink) | | `-reboot-after` (5m) |
 
 To keep a bad situation from getting worse it leaves at least `-cooldown`
 between reboots, stops after a few reboots that don't restore connectivity (an
@@ -78,6 +86,12 @@ upstream outage a reboot can't fix shouldn't become a reboot loop), and waits
 for connectivity to hold across a couple of checks before treating an outage as
 over. The reboot count and timing are persisted (`-state-file`), so restarting
 the watchdog - or the whole host - doesn't lose them.
+
+Every outage ends with a `connectivity restored` log line saying how long it
+lasted. Prometheus metrics (`sagemcom_fast_watchdog_*`: connectivity, probe
+results and latency, the current outage's start time, reboots by reason and
+result, WAN checks, and whether it has given up) are served on
+`-addr` (default `127.0.0.1:9781`) at `/metrics`.
 
 It's deliberately separate from the exporter: it needs write access to the
 device and a long-running process, and most people want neither.
