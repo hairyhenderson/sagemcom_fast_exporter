@@ -114,7 +114,7 @@ func parseFlags(fs *flag.FlagSet, cfg *config, args []string) error {
 			"or its WAN came back during the outage (measured from when it came back)")
 	fs.DurationVar(&cfg.WedgedRebootAfter, "wedged-reboot-after", defaultWedgedRebootAfter,
 		"Reboot the device after this long with no connectivity while it reports its WAN up "+
-			"for the whole outage (0 uses -reboot-after)")
+			"for the whole outage; at most -reboot-after (0 uses -reboot-after)")
 	fs.DurationVar(&cfg.WANDownRebootAfter, "wan-down-reboot-after", defaultWANDownRebootAfter,
 		"Reboot the device after this long with no connectivity while it reports its WAN down (0 never reboots)")
 	fs.DurationVar(&cfg.Cooldown, "cooldown", defaultCooldown,
@@ -175,6 +175,13 @@ func validateConfig(cfg *config) error {
 
 	if cfg.WedgedRebootAfter < 0 {
 		return errors.New("-wedged-reboot-after must not be negative")
+	}
+
+	// a wedge is the one case a reboot is known to fix, so it never makes
+	// sense to wait longer for it than when the WAN state is unknown
+	if cfg.WedgedRebootAfter > cfg.RebootAfter {
+		return fmt.Errorf("-wedged-reboot-after (%s) must not be longer than -reboot-after (%s)",
+			cfg.WedgedRebootAfter, cfg.RebootAfter)
 	}
 
 	if cfg.WANDownRebootAfter < 0 {

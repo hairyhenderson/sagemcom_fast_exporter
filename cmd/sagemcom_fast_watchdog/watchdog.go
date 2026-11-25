@@ -179,17 +179,20 @@ func (w *watchdog) onFailure(ctx context.Context) {
 
 // firstDecisionAfter is how long an outage must last before the watchdog
 // starts checking the device's WAN status to decide whether to reboot it: the
-// shortest threshold that could apply.
+// shortest threshold that could apply. validateConfig ensures
+// -wedged-reboot-after is no longer than -reboot-after.
 func (w *watchdog) firstDecisionAfter() time.Duration {
 	first := w.cfg.RebootAfter
 	if w.wanUnsupported {
 		return first
 	}
 
-	for _, d := range []time.Duration{w.cfg.WedgedRebootAfter, w.cfg.WANDownRebootAfter} {
-		if d > 0 && d < first {
-			first = d
-		}
+	if w.cfg.WedgedRebootAfter > 0 {
+		first = w.cfg.WedgedRebootAfter
+	}
+
+	if d := w.cfg.WANDownRebootAfter; d > 0 && d < first {
+		first = d
 	}
 
 	return first
